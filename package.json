@@ -1,0 +1,13 @@
+{
+  "name": "mi-compra",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Catálogo de productos y lista de la compra con Angular, Express y MongoDB.",
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend start",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "typecheck": "npm --prefix backend run typecheck"
+  }
+}

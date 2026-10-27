@@ -1,0 +1,159 @@
+@if (error()) {
+  <div class="app-alert error" role="alert">
+    <span>⚠</span>
+    <span>{{ error() }}</span>
+    <button type="button" aria-label="Cerrar aviso" (click)="error.set('')">×</button>
+  </div>
+}
+
+<section class="shopping-layout">
+  <section class="panel list-panel">
+    <div class="list-heading">
+      <div>
+        <div class="section-kicker">TU PRÓXIMA VISITA A LA TIENDA</div>
+        <h2>Lista de la compra</h2>
+        <p>Marca lo que vayas metiendo en el carrito.</p>
+      </div>
+      <div class="list-icon">☷</div>
+    </div>
+
+    <div class="list-toolbar">
+      <div class="search-box">
+        <span>⌕</span>
+        <input
+          [ngModel]="busqueda()"
+          (ngModelChange)="busqueda.set($event)"
+          placeholder="Buscar en la lista..."
+          aria-label="Buscar en la lista"
+        />
+      </div>
+      @if (hayComprados()) {
+        <button type="button" class="text-button" (click)="vaciarComprados()">
+          Quitar comprados
+        </button>
+      }
+    </div>
+
+    @if (cargando()) {
+      <div class="empty-state list-empty">
+        <div class="empty-illustration">🛒</div>
+        <h3>Cargando tu lista…</h3>
+        <p>Estamos recuperando los artículos guardados.</p>
+      </div>
+    } @else if (itemsFiltrados().length) {
+      <div class="shopping-items">
+        @for (item of itemsFiltrados(); track item._id) {
+          <article class="shopping-item" [class.checked]="item.comprado">
+            <button
+              class="check-button"
+              type="button"
+              [attr.aria-label]="item.comprado ? 'Marcar pendiente' : 'Marcar comprado'"
+              (click)="alternar(item)"
+            >
+              {{ item.comprado ? '✓' : '' }}
+            </button>
+            <span class="item-emoji">{{ item.categoriaIcono || '🛍️' }}</span>
+            <div class="item-info">
+              <strong>{{ item.nombre }}</strong>
+              <small>
+                {{ item.categoriaNombre || 'Sin categoría' }} ·
+                {{ item.precio | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }} / ud.
+              </small>
+            </div>
+            <div class="quantity-control">
+              <button
+                type="button"
+                (click)="cambiarCantidad(item, -1)"
+                aria-label="Reducir cantidad"
+              >
+                −
+              </button>
+              <span>{{ item.cantidad }}</span>
+              <button
+                type="button"
+                (click)="cambiarCantidad(item, 1)"
+                aria-label="Aumentar cantidad"
+              >
+                ＋
+              </button>
+            </div>
+            <strong class="item-total">
+              {{ item.precio * item.cantidad | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }}
+            </strong>
+            <button
+              type="button"
+              class="remove-button"
+              (click)="eliminar(item)"
+              aria-label="Eliminar de la lista"
+            >
+              ×
+            </button>
+          </article>
+        }
+      </div>
+    } @else {
+      <div class="empty-state list-empty">
+        <div class="empty-illustration">🛒</div>
+        <h3>{{ busqueda() ? 'No hay resultados' : 'Tu lista está vacía' }}</h3>
+        <p>
+          {{
+            busqueda()
+              ? 'Prueba con otra búsqueda.'
+              : 'Ve a «Mis productos» y pulsa el botón + de los productos que necesites.'
+          }}
+        </p>
+        @if (!busqueda()) {
+          <a class="primary-button" routerLink="/productos">Explorar mis productos</a>
+        }
+      </div>
+    }
+
+    @if (items().length) {
+      <div class="list-bottom">
+        <span>
+          {{ items().length }} referencias · {{ pendientes() }} pendientes
+        </span>
+        <a class="text-button" routerLink="/productos">＋ Añadir más productos</a>
+      </div>
+    }
+  </section>
+
+  <aside class="summary-card">
+    <div class="summary-top">
+      <span class="summary-icon">€</span>
+      <span>RESUMEN DE COMPRA</span>
+    </div>
+    <h3>Tu compra estimada</h3>
+    <p>El total se actualiza al cambiar las cantidades.</p>
+
+    <div class="summary-line">
+      <span>Productos en la lista</span>
+      <strong>{{ items().length }}</strong>
+    </div>
+    <div class="summary-line">
+      <span>Unidades en total</span>
+      <strong>{{ totalUnidades() }}</strong>
+    </div>
+    <div class="summary-line">
+      <span>Ya comprado</span>
+      <strong>{{ totalComprado() | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }}</strong>
+    </div>
+
+    <div class="summary-divider"></div>
+
+    <div class="grand-total">
+      <span>Total estimado</span>
+      <strong>{{ total() | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }}</strong>
+    </div>
+
+    <div class="summary-note">
+      <span>✦</span>
+      <p>
+        Estimación basada en los precios que has guardado. El precio real en tienda
+        puede variar.
+      </p>
+    </div>
+
+    <a class="primary-button full-button" routerLink="/productos">＋ Añadir productos</a>
+  </aside>
+</section>

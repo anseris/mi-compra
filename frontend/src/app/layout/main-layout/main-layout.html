@@ -1,0 +1,56 @@
+<div class="app-shell">
+  <header class="topbar">
+    <a class="brand" routerLink="/productos">
+      <span class="brand-mark">🛒</span>
+      <span class="brand-copy">
+        <strong>Mi compra</strong>
+        <small>Tu compra, bajo control</small>
+      </span>
+    </a>
+
+    <div class="topbar-right">
+      <span class="saved-label">
+        <span class="saved-dot"></span> Sincronizado en la nube
+      </span>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <div class="eyebrow"><span class="eyebrow-line"></span> COMPRA INTELIGENTE</div>
+        <h1>
+          Organiza tu compra.<br /><span>Controla tu presupuesto.</span>
+        </h1>
+        <p>Guarda tus productos habituales y prepara tu lista en segundos.</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <span class="art-circle"></span>
+        <span class="art-leaf leaf-one">✦</span>
+        <span class="art-bag">🛍️</span>
+        <span class="art-leaf leaf-two">✦</span>
+      </div>
+    </section>
+
+    <nav class="view-tabs" aria-label="Vistas de la aplicación">
+      <a routerLink="/productos" routerLinkActive="active">
+        <span class="tab-icon">▦</span> Mis productos
+        <span class="tab-count">{{ totalProductos() }}</span>
+      </a>
+      <a routerLink="/lista" routerLinkActive="active">
+        <span class="tab-icon">☷</span> Lista de la compra
+        <span class="tab-count">{{ totalLista() }}</span>
+        @if (pendientes() > 0) {
+          <span class="tab-badge">{{ pendientes() }}</span>
+        }
+      </a>
+    </nav>
+
+    <router-outlet></router-outlet>
+
+    <footer class="app-footer">
+      <span>Hecho para comprar con más tranquilidad <span class="heart">♥</span></span>
+      <span>MI COMPRA · TU LISTA, TUS REGLAS</span>
+    </footer>
+  </main>
+</div>
