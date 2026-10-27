@@ -17,7 +17,7 @@ app.use(
     origin:
       origenesPermitidos.length > 0
         ? origenesPermitidos
-        : ["http://localhost:4200", "http://127.0.0.1:4200", "http://[::1]:4200"],
+        : ["http://localhost:4200", "http://127.0.0.1:4200"],
   }),
 );
 
