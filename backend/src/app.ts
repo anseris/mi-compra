@@ -7,17 +7,30 @@ import listasCompraRoutes from "./routes/listas-compra.routes.js";
 
 const app = express();
 
-const origenesPermitidos = (process.env["CORS_ORIGINS"] ?? "")
+const origenesConfigurados = (process.env["CORS_ORIGINS"] ?? "")
   .split(",")
   .map((origen) => origen.trim())
   .filter(Boolean);
 
+function normalizarOrigen(origen: string): string {
+  const url = new URL(/^[a-z][a-z\d+.-]*:\/\//i.test(origen) ? origen : `https://${origen}`);
+
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new Error(`Origen CORS no válido: ${origen}`);
+  }
+
+  return url.origin;
+}
+
+const origenesPermitidos = (
+  origenesConfigurados.length > 0
+    ? origenesConfigurados
+    : ["http://localhost:4200", "http://127.0.0.1:4200"]
+).map(normalizarOrigen);
+
 app.use(
   cors({
-    origin:
-      origenesPermitidos.length > 0
-        ? origenesPermitidos
-        : ["http://localhost:4200", "http://127.0.0.1:4200"],
+    origin: origenesPermitidos,
   }),
 );
 
