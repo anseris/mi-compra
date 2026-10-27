@@ -1,6 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { finalize, Observable, of, shareReplay, switchMap, tap, throwError } from 'rxjs';
+import { finalize, map, Observable, of, shareReplay, switchMap, tap, throwError } from 'rxjs';
 import { API_BASE } from '../api-base';
 import type { ListaCompra } from '../models/lista-compra.model';
 import type {
@@ -89,6 +89,28 @@ export class ListaCompraService {
         this.listaSeleccionadaIdSignal.set(lista._id);
         this.itemsSignal.set([]);
         this.cargado = true;
+      }),
+    );
+  }
+
+  eliminarLista(id: string): Observable<ApiMensaje> {
+    const eraSeleccionada = this.listaSeleccionadaIdSignal() === id;
+
+    return this.http.delete<ApiMensaje>(`${this.listasUrl}/${id}`).pipe(
+      switchMap((respuesta) => {
+        this.listasSignal.update((listas) => listas.filter((lista) => lista._id !== id));
+
+        if (!eraSeleccionada) {
+          return of(respuesta);
+        }
+
+        const siguiente = this.listasSignal().find((lista) => lista.predeterminada)
+          ?? this.listasSignal()[0];
+        this.listaSeleccionadaIdSignal.set(siguiente?._id ?? '');
+        this.itemsSignal.set([]);
+        this.cargado = false;
+
+        return this.cargar(true).pipe(map(() => respuesta));
       }),
     );
   }

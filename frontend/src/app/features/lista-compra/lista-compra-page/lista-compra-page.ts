@@ -4,7 +4,10 @@ import { Component, computed, inject, OnInit, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { RouterLink } from "@angular/router";
 import { ButtonModule } from "primeng/button";
+import { SelectModule } from "primeng/select";
+import type { Categoria } from "../../../core/models/categoria.model";
 import type { ItemLista } from "../../../core/models/item-lista.model";
+import { CategoriasService } from "../../../core/services/categorias.service";
 import { ListaCompraService } from "../../../core/services/lista-compra.service";
 import { mensajeError } from "../../../shared/utils/api-error";
 import { CardModule } from "primeng/card";
@@ -21,6 +24,7 @@ import { DividerModule } from "primeng/divider";
     CurrencyPipe,
     RouterLink,
     ButtonModule,
+    SelectModule,
     CardModule,
     InputTextModule,
     IconFieldModule,
@@ -34,8 +38,10 @@ import { DividerModule } from "primeng/divider";
 })
 export class ListaCompraPage implements OnInit {
   private readonly listaService = inject(ListaCompraService);
+  private readonly categoriasService = inject(CategoriasService);
 
   readonly items = this.listaService.items;
+  readonly categorias = this.categoriasService.categorias;
   readonly listas = this.listaService.listas;
   readonly listaSeleccionada = this.listaService.listaSeleccionada;
   readonly listaSeleccionadaId = this.listaService.listaSeleccionadaId;
@@ -43,18 +49,41 @@ export class ListaCompraPage implements OnInit {
   readonly busqueda = signal("");
   readonly error = signal("");
   readonly aviso = signal("");
+  readonly filtroCategoria = signal("todas");
   nombreNuevaLista = "";
+
+  readonly opcionesLista = computed(() =>
+    this.listas().map((lista) => ({ nombre: lista.nombre, valor: lista._id })),
+  );
+
+  readonly opcionesFiltroCategoria = computed(() => [
+    { nombre: "Todas las categorías", valor: "todas" },
+    ...this.categorias().map((categoria: Categoria) => ({
+      nombre: categoria.nombre,
+      valor: categoria._id,
+    })),
+    { nombre: "Sin categoría", valor: "sin-categoria" },
+  ]);
 
   readonly itemsFiltrados = computed(() => {
     const consulta = this.busqueda().trim().toLocaleLowerCase("es");
+    const filtroCategoria = this.filtroCategoria();
 
     return this.items().filter(
       (item) =>
-        !consulta ||
-        item.nombre.toLocaleLowerCase("es").includes(consulta) ||
-        item.categoriaNombre.toLocaleLowerCase("es").includes(consulta),
+        (filtroCategoria === "todas" ||
+          (filtroCategoria === "sin-categoria"
+            ? !item.categoriaId
+            : item.categoriaId === filtroCategoria)) &&
+        (!consulta ||
+          item.nombre.toLocaleLowerCase("es").includes(consulta) ||
+          item.categoriaNombre.toLocaleLowerCase("es").includes(consulta)),
     );
   });
+
+  readonly hayFiltrosActivos = computed(
+    () => Boolean(this.busqueda().trim()) || this.filtroCategoria() !== "todas",
+  );
 
   readonly total = computed(() =>
     this.items().reduce((suma, item) => suma + item.precio * item.cantidad, 0),
@@ -79,6 +108,12 @@ export class ListaCompraPage implements OnInit {
   );
 
   ngOnInit(): void {
+    this.categoriasService.cargar().subscribe({
+      error: (error: unknown) => {
+        this.error.set(mensajeError(error, "No se pudieron cargar las categorías."));
+      },
+    });
+
     this.listaService.cargar().subscribe({
       error: (error: unknown) => {
         this.error.set(
@@ -88,9 +123,38 @@ export class ListaCompraPage implements OnInit {
     });
   }
 
+  eliminarLista(): void {
+    const lista = this.listaSeleccionada();
+
+    if (!lista || lista.predeterminada) {
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `¿Eliminar la lista «${lista.nombre}» y todos sus artículos? Esta acción no se puede deshacer.`,
+      )
+    ) {
+      return;
+    }
+
+    this.error.set("");
+    this.listaService.eliminarLista(lista._id).subscribe({
+      next: () => {
+        this.filtroCategoria.set("todas");
+        this.busqueda.set("");
+        this.aviso.set(`Lista «${lista.nombre}» eliminada.`);
+      },
+      error: (error: unknown) => {
+        this.error.set(mensajeError(error, "No se pudo eliminar la lista."));
+      },
+    });
+  }
+
   cambiarLista(id: string): void {
     this.error.set("");
     this.busqueda.set("");
+    this.filtroCategoria.set("todas");
 
     this.listaService.seleccionarLista(id).subscribe({
       error: (error: unknown) => {
@@ -121,6 +185,7 @@ export class ListaCompraPage implements OnInit {
       next: (lista) => {
         this.nombreNuevaLista = "";
         this.busqueda.set("");
+        this.filtroCategoria.set("todas");
         this.aviso.set(`Lista «${lista.nombre}» creada.`);
       },
       error: (error: unknown) => {

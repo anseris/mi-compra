@@ -27,18 +27,18 @@
       <div class="flex flex-column md:flex-row gap-3 mb-3 align-items-end">
         <div class="flex flex-column gap-2 flex-1">
           <label for="listaActual" class="text-sm font-semibold">Lista activa</label>
-          <select
+          <p-select
+            class="p-0 w-full"
             id="listaActual"
             name="listaActual"
-            class="lista-selector"
+            [options]="opcionesLista()"
             [ngModel]="listaSeleccionadaId()"
             (ngModelChange)="cambiarLista($event)"
+            optionLabel="nombre"
+            optionValue="valor"
+            placeholder="Selecciona una lista"
             [disabled]="cargando()"
-          >
-            @for (lista of listas(); track lista._id) {
-              <option [value]="lista._id">{{ lista.nombre }}</option>
-            }
-          </select>
+          />
         </div>
         <form (ngSubmit)="crearLista()" class="flex gap-2 align-items-center">
           <input
@@ -57,6 +57,17 @@
             [disabled]="cargando()"
           />
         </form>
+        @if (listaSeleccionada() && !listaSeleccionada()?.predeterminada) {
+          <p-button
+            label="Eliminar lista"
+            icon="pi pi-trash"
+            severity="danger"
+            [outlined]="true"
+            type="button"
+            [disabled]="cargando()"
+            (onClick)="eliminarLista()"
+          />
+        }
       </div>
 
       <div class="flex flex-column md:flex-row gap-2 mb-3 align-items-center">
@@ -69,6 +80,18 @@
             aria-label="Buscar en la lista"
           />
         </div>
+        <p-select
+          class="p-0 w-full md:w-16rem"
+          inputId="filtroCategoriaLista"
+          name="filtroCategoriaLista"
+          [options]="opcionesFiltroCategoria()"
+          [ngModel]="filtroCategoria()"
+          (ngModelChange)="filtroCategoria.set($event)"
+          optionLabel="nombre"
+          optionValue="valor"
+          placeholder="Todas las categorías"
+          ariaLabel="Filtrar por categoría"
+        />
         @if (hayComprados()) {
           <button type="button" class="text-button" (click)="vaciarComprados()">
             Quitar comprados
@@ -119,15 +142,15 @@
           <div class="flex align-items-center justify-content-center border-circle bg-primary-50" style="width: 4rem; height: 4rem;">
             <i class="pi pi-shopping-cart text-3xl text-primary"></i>
           </div>
-          <div class="text-xl font-bold">{{ busqueda() ? 'No hay resultados' : 'Tu lista está vacía' }}</div>
+          <div class="text-xl font-bold">{{ hayFiltrosActivos() ? 'No hay resultados' : 'Tu lista está vacía' }}</div>
           <div class="text-color-secondary max-w-30rem">
             {{
-              busqueda()
-                ? 'Prueba con otra búsqueda.'
+              hayFiltrosActivos()
+                ? 'Prueba con otra búsqueda o categoría.'
                 : 'Ve a «Mis productos» y pulsa el botón + de los productos que necesites.'
             }}
           </div>
-          @if (!busqueda()) {
+          @if (!hayFiltrosActivos()) {
             <p-button label="Explorar mis productos" icon="pi pi-list" routerLink="/productos" />
           }
         </div>

@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import { ItemLista } from '../models/item-lista.model.js';
 import { ListaCompra } from '../models/lista-compra.model.js';
 import { obtenerListaPredeterminada } from '../services/listas-compra.service.js';
 
@@ -41,5 +42,29 @@ export const createLista = async (req: Request, res: Response): Promise<void> =>
   } catch (error) {
     console.error(error);
     res.status(400).json({ mensaje: 'No se pudo crear la lista.' });
+  }
+};
+
+export const deleteLista = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const lista = await ListaCompra.findById(req.params['id']);
+
+    if (!lista) {
+      res.status(404).json({ mensaje: 'Lista no encontrada.' });
+      return;
+    }
+
+    if (lista.predeterminada) {
+      res.status(400).json({ mensaje: 'No se puede eliminar la lista predeterminada.' });
+      return;
+    }
+
+    await ItemLista.deleteMany({ listaId: lista._id });
+    await lista.deleteOne();
+
+    res.status(200).json({ mensaje: 'Lista eliminada correctamente.' });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ mensaje: 'No se pudo eliminar la lista.' });
   }
 };
