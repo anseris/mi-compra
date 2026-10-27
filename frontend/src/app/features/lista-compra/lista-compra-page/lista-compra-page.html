@@ -1,159 +1,189 @@
 @if (error()) {
-  <div class="app-alert error" role="alert">
-    <span>⚠</span>
+  <p-message severity="error" styleClass="w-full mb-3" [closable]="true" (onClose)="error.set('')">
     <span>{{ error() }}</span>
-    <button type="button" aria-label="Cerrar aviso" (click)="error.set('')">×</button>
-  </div>
+  </p-message>
 }
 
-<section class="shopping-layout">
-  <section class="panel list-panel">
-    <div class="list-heading">
-      <div>
-        <div class="section-kicker">TU PRÓXIMA VISITA A LA TIENDA</div>
-        <h2>Lista de la compra</h2>
-        <p>Marca lo que vayas metiendo en el carrito.</p>
-      </div>
-      <div class="list-icon">☷</div>
-    </div>
+<div class="grid">
+  <div class="col-12 lg:col-8">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="flex align-items-center justify-content-between p-3">
+          <div>
+            <div class="text-sm text-primary font-semibold">TU PRÓXIMA VISITA A LA TIENDA</div>
+            <div class="text-2xl font-bold">{{ listaSeleccionada()?.nombre ?? 'Lista de la compra' }}</div>
+            <div class="text-sm text-color-secondary">Marca lo que vayas metiendo en el carrito.</div>
+          </div>
+          <i class="pi pi-shopping-cart text-4xl text-primary"></i>
+        </div>
+      </ng-template>
 
-    <div class="list-toolbar">
-      <div class="search-box">
-        <span>⌕</span>
-        <input
-          [ngModel]="busqueda()"
-          (ngModelChange)="busqueda.set($event)"
-          placeholder="Buscar en la lista..."
-          aria-label="Buscar en la lista"
-        />
-      </div>
-      @if (hayComprados()) {
-        <button type="button" class="text-button" (click)="vaciarComprados()">
-          Quitar comprados
-        </button>
+      @if (aviso()) {
+        <p-message severity="success" styleClass="w-full mb-3" [closable]="true" (onClose)="aviso.set('')">
+          <span>{{ aviso() }}</span>
+        </p-message>
       }
-    </div>
 
-    @if (cargando()) {
-      <div class="empty-state list-empty">
-        <div class="empty-illustration">🛒</div>
-        <h3>Cargando tu lista…</h3>
-        <p>Estamos recuperando los artículos guardados.</p>
+      <div class="flex flex-column md:flex-row gap-3 mb-3 align-items-end">
+        <div class="flex flex-column gap-2 flex-1">
+          <label for="listaActual" class="text-sm font-semibold">Lista activa</label>
+          <select
+            id="listaActual"
+            name="listaActual"
+            class="lista-selector"
+            [ngModel]="listaSeleccionadaId()"
+            (ngModelChange)="cambiarLista($event)"
+            [disabled]="cargando()"
+          >
+            @for (lista of listas(); track lista._id) {
+              <option [value]="lista._id">{{ lista.nombre }}</option>
+            }
+          </select>
+        </div>
+        <form (ngSubmit)="crearLista()" class="flex gap-2 align-items-center">
+          <input
+            pInputText
+            name="nombreNuevaLista"
+            [(ngModel)]="nombreNuevaLista"
+            placeholder="Nombre de la nueva lista"
+            aria-label="Nombre de la nueva lista"
+            maxlength="60"
+            required
+          />
+          <p-button
+            label="Crear lista"
+            icon="pi pi-plus"
+            type="submit"
+            [disabled]="cargando()"
+          />
+        </form>
       </div>
-    } @else if (itemsFiltrados().length) {
-      <div class="shopping-items">
-        @for (item of itemsFiltrados(); track item._id) {
-          <article class="shopping-item" [class.checked]="item.comprado">
-            <button
-              class="check-button"
-              type="button"
-              [attr.aria-label]="item.comprado ? 'Marcar pendiente' : 'Marcar comprado'"
-              (click)="alternar(item)"
-            >
-              {{ item.comprado ? '✓' : '' }}
-            </button>
-            <span class="item-emoji">{{ item.categoriaIcono || '🛍️' }}</span>
-            <div class="item-info">
-              <strong>{{ item.nombre }}</strong>
-              <small>
-                {{ item.categoriaNombre || 'Sin categoría' }} ·
-                {{ item.precio | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }} / ud.
-              </small>
-            </div>
-            <div class="quantity-control">
-              <button
-                type="button"
-                (click)="cambiarCantidad(item, -1)"
-                aria-label="Reducir cantidad"
-              >
-                −
-              </button>
-              <span>{{ item.cantidad }}</span>
-              <button
-                type="button"
-                (click)="cambiarCantidad(item, 1)"
-                aria-label="Aumentar cantidad"
-              >
-                ＋
-              </button>
-            </div>
-            <strong class="item-total">
-              {{ item.precio * item.cantidad | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }}
-            </strong>
-            <button
-              type="button"
-              class="remove-button"
-              (click)="eliminar(item)"
-              aria-label="Eliminar de la lista"
-            >
-              ×
-            </button>
-          </article>
+
+      <div class="flex flex-column md:flex-row gap-2 mb-3 align-items-center">
+        <div class="search-box flex-1">
+          <span>⌕</span>
+          <input
+            [ngModel]="busqueda()"
+            (ngModelChange)="busqueda.set($event)"
+            placeholder="Buscar en la lista..."
+            aria-label="Buscar en la lista"
+          />
+        </div>
+        @if (hayComprados()) {
+          <button type="button" class="text-button" (click)="vaciarComprados()">
+            Quitar comprados
+          </button>
         }
       </div>
-    } @else {
-      <div class="empty-state list-empty">
-        <div class="empty-illustration">🛒</div>
-        <h3>{{ busqueda() ? 'No hay resultados' : 'Tu lista está vacía' }}</h3>
-        <p>
-          {{
-            busqueda()
-              ? 'Prueba con otra búsqueda.'
-              : 'Ve a «Mis productos» y pulsa el botón + de los productos que necesites.'
-          }}
-        </p>
-        @if (!busqueda()) {
-          <a class="primary-button" routerLink="/productos">Explorar mis productos</a>
-        }
+
+      @if (cargando()) {
+        <div class="flex flex-column align-items-center justify-content-center py-8 gap-2">
+          <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+          <div class="text-xl font-semibold">Cargando tu lista…</div>
+          <div class="text-color-secondary">Estamos recuperando los artículos guardados.</div>
+        </div>
+      } @else if (itemsFiltrados().length) {
+        <div class="flex flex-column gap-2">
+          @for (item of itemsFiltrados(); track item._id) {
+            <div class="flex align-items-center gap-3 p-3 border-round surface-0 border-1 surface-border" [class.opacity-60]="item.comprado">
+              <p-button
+                [icon]="item.comprado ? 'pi pi-check' : ''"
+                [rounded]="true"
+                [outlined]="!item.comprado"
+                [severity]="item.comprado ? 'success' : 'secondary'"
+                (onClick)="alternar(item)"
+                [attr.aria-label]="item.comprado ? 'Marcar pendiente' : 'Marcar comprado'"
+                styleClass="flex-shrink-0"
+              />
+              <span class="text-2xl">{{ item.categoriaIcono || '🛍️' }}</span>
+              <div class="flex-1">
+                <div class="font-semibold" [class.line-through]="item.comprado">{{ item.nombre }}</div>
+                <div class="text-sm text-color-secondary">
+                  {{ item.categoriaNombre || 'Sin categoría' }} · {{ item.precio | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }} / ud.
+                </div>
+              </div>
+              <div class="flex align-items-center gap-2">
+                <p-button icon="pi pi-minus" [rounded]="true" [text]="true" size="small" (onClick)="cambiarCantidad(item, -1)" aria-label="Reducir cantidad" />
+                <span class="w-2rem text-center">{{ item.cantidad }}</span>
+                <p-button icon="pi pi-plus" [rounded]="true" [text]="true" size="small" (onClick)="cambiarCantidad(item, 1)" aria-label="Aumentar cantidad" />
+              </div>
+              <div class="font-bold w-6rem text-right">
+                {{ item.precio * item.cantidad | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }}
+              </div>
+              <p-button icon="pi pi-times" [rounded]="true" [text]="true" severity="danger" (onClick)="eliminar(item)" aria-label="Eliminar de la lista" />
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="flex flex-column align-items-center justify-content-center py-8 gap-3 text-center">
+          <div class="flex align-items-center justify-content-center border-circle bg-primary-50" style="width: 4rem; height: 4rem;">
+            <i class="pi pi-shopping-cart text-3xl text-primary"></i>
+          </div>
+          <div class="text-xl font-bold">{{ busqueda() ? 'No hay resultados' : 'Tu lista está vacía' }}</div>
+          <div class="text-color-secondary max-w-30rem">
+            {{
+              busqueda()
+                ? 'Prueba con otra búsqueda.'
+                : 'Ve a «Mis productos» y pulsa el botón + de los productos que necesites.'
+            }}
+          </div>
+          @if (!busqueda()) {
+            <p-button label="Explorar mis productos" icon="pi pi-list" routerLink="/productos" />
+          }
+        </div>
+      }
+
+      @if (items().length) {
+        <p-divider></p-divider>
+        <div class="flex align-items-center justify-content-between">
+          <span class="text-color-secondary">{{ items().length }} referencias · {{ pendientes() }} pendientes</span>
+          <p-button label="Añadir más productos" icon="pi pi-plus" [text]="true" routerLink="/productos" />
+        </div>
+      }
+    </p-card>
+  </div>
+
+  <div class="col-12 lg:col-4">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="flex align-items-center gap-2 p-3">
+          <i class="pi pi-euro text-primary text-xl"></i>
+          <div class="text-sm font-semibold">RESUMEN DE COMPRA</div>
+        </div>
+      </ng-template>
+      <div class="flex flex-column gap-2">
+        <div class="text-xl font-bold">Tu compra estimada</div>
+        <div class="text-sm text-color-secondary">El total se actualiza al cambiar las cantidades.</div>
+
+        <div class="flex align-items-center justify-content-between mt-2">
+          <span>Productos en la lista</span>
+          <span class="font-semibold">{{ items().length }}</span>
+        </div>
+        <div class="flex align-items-center justify-content-between">
+          <span>Unidades en total</span>
+          <span class="font-semibold">{{ totalUnidades() }}</span>
+        </div>
+        <div class="flex align-items-center justify-content-between">
+          <span>Ya comprado</span>
+          <span class="font-semibold">{{ totalComprado() | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }}</span>
+        </div>
+
+        <p-divider></p-divider>
+
+        <div class="flex align-items-center justify-content-between text-lg">
+          <span class="font-semibold">Total estimado</span>
+          <span class="font-bold text-xl">{{ total() | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }}</span>
+        </div>
+
+        <div class="flex gap-2 p-3 surface-50 border-round mt-2">
+          <i class="pi pi-info-circle text-primary"></i>
+          <div class="text-sm text-color-secondary">
+            Estimación basada en los precios que has guardado. El precio real en tienda puede variar.
+          </div>
+        </div>
+
+        <p-button label="Añadir productos" icon="pi pi-plus" styleClass="w-full mt-2" routerLink="/productos" />
       </div>
-    }
-
-    @if (items().length) {
-      <div class="list-bottom">
-        <span>
-          {{ items().length }} referencias · {{ pendientes() }} pendientes
-        </span>
-        <a class="text-button" routerLink="/productos">＋ Añadir más productos</a>
-      </div>
-    }
-  </section>
-
-  <aside class="summary-card">
-    <div class="summary-top">
-      <span class="summary-icon">€</span>
-      <span>RESUMEN DE COMPRA</span>
-    </div>
-    <h3>Tu compra estimada</h3>
-    <p>El total se actualiza al cambiar las cantidades.</p>
-
-    <div class="summary-line">
-      <span>Productos en la lista</span>
-      <strong>{{ items().length }}</strong>
-    </div>
-    <div class="summary-line">
-      <span>Unidades en total</span>
-      <strong>{{ totalUnidades() }}</strong>
-    </div>
-    <div class="summary-line">
-      <span>Ya comprado</span>
-      <strong>{{ totalComprado() | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }}</strong>
-    </div>
-
-    <div class="summary-divider"></div>
-
-    <div class="grand-total">
-      <span>Total estimado</span>
-      <strong>{{ total() | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }}</strong>
-    </div>
-
-    <div class="summary-note">
-      <span>✦</span>
-      <p>
-        Estimación basada en los precios que has guardado. El precio real en tienda
-        puede variar.
-      </p>
-    </div>
-
-    <a class="primary-button full-button" routerLink="/productos">＋ Añadir productos</a>
-  </aside>
-</section>
+    </p-card>
+  </div>
+</div>

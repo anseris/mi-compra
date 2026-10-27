@@ -1,6 +1,7 @@
 /** Artículo de la lista de la compra (colección `lista_compra`). */
 export interface ItemLista {
   _id: string;
+  listaId: string;
   /** Producto del catálogo del que se copió el artículo. */
   productoId: string | null;
   categoriaId: string | null;
@@ -17,6 +18,7 @@ export interface ItemLista {
 /** Cuerpo para añadir un producto del catálogo a la lista (POST). */
 export interface CrearItemLista {
   productoId: string;
+  listaId?: string;
   cantidad?: number;
 }
 

@@ -1,211 +1,312 @@
 @if (error()) {
-  <div class="app-alert error" role="alert">
-    <span>⚠</span>
-    <span>{{ error() }}</span>
-    <button type="button" aria-label="Cerrar aviso" (click)="error.set('')">×</button>
-  </div>
+<p-message
+  severity="error"
+  styleClass="w-full mb-3"
+  [closable]="true"
+  (onClose)="error.set('')"
+>
+  <span>{{ error() }}</span>
+</p-message>
+} @if (aviso()) {
+<p-message
+  severity="success"
+  styleClass="w-full mb-3"
+  [closable]="true"
+  (onClose)="aviso.set('')"
+>
+  <span>{{ aviso() }}</span>
+</p-message>
 }
 
-@if (aviso()) {
-  <div class="app-alert ok" role="status">
-    <span>✓</span>
-    <span>{{ aviso() }}</span>
-    <button type="button" aria-label="Cerrar aviso" (click)="aviso.set('')">×</button>
-  </div>
-}
-
-<section class="content-grid">
-  <aside class="panel form-panel">
-    <div class="panel-heading">
-      <div class="heading-icon">＋</div>
-      <div>
-        <h2>{{ editandoId ? 'Editar producto' : 'Añadir producto' }}</h2>
-        <p>Guarda tus productos habituales</p>
-      </div>
-    </div>
-
-    <form class="product-form" (ngSubmit)="guardarProducto()">
-      <label for="productoNombre">Nombre del producto</label>
-      <input
-        id="productoNombre"
-        name="productoNombre"
-        [(ngModel)]="nombreProducto"
-        placeholder="Ej. Leche semidesnatada"
-        required
-        maxlength="100"
-      />
-
-      <div class="field-row">
-        <div class="field price-field">
-          <label for="productoPrecio">Precio (€)</label>
-          <div class="price-input">
-            <span>€</span>
-            <input
-              id="productoPrecio"
-              name="productoPrecio"
-              type="number"
-              [(ngModel)]="precio"
-              placeholder="0,00"
-              min="0"
-              step="0.01"
-              required
-            />
+<div class="grid">
+  <div class="col-12 lg:col-4">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="flex align-items-center gap-2 p-3">
+          <i class="pi pi-plus-circle text-primary text-xl"></i>
+          <div>
+            <div class="text-xl font-bold">
+              {{ editandoId ? 'Editar producto' : 'Añadir producto' }}
+            </div>
+            <div class="text-sm text-color-secondary">
+              Guarda tus productos habituales
+            </div>
           </div>
         </div>
-        <div class="field">
-          <label for="productoCategoria">Categoría</label>
-          <select
-            id="productoCategoria"
-            name="productoCategoria"
-            [(ngModel)]="categoriaSeleccionada"
+      </ng-template>
+
+      <form (ngSubmit)="guardarProducto()" class="flex flex-column gap-3">
+        <div class="flex flex-column gap-2">
+          <label for="productoNombre">Nombre del producto</label>
+          <input
+            id="productoNombre"
+            pInputText
+            name="productoNombre"
+            [(ngModel)]="nombreProducto"
+            placeholder="Ej. Leche semidesnatada"
             required
-          >
-            @for (categoria of categorias(); track categoria._id) {
-              <option [ngValue]="categoria._id">{{ categoria.nombre }}</option>
-            }
-          </select>
+            maxlength="100"
+          />
+        </div>
+
+        <div class="grid align-items-end">
+          <div class="col-6">
+            <div class="flex flex-column gap-2">
+              <label for="productoPrecio">Precio (€)</label>
+              <p-inputNumber
+                inputId="productoPrecio"
+                name="productoPrecio"
+                [(ngModel)]="precio"
+                mode="decimal"
+                [minFractionDigits]="2"
+                [maxFractionDigits]="2"
+                [min]="0"
+                placeholder="0,00"
+                styleClass="w-full"
+                inputStyleClass="w-full"
+              />
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="flex flex-column gap-2">
+              <label for="productoCategoria">Categoría</label>
+              <p-select
+                class="p-0"
+                inputId="productoCategoria"
+                name="productoCategoria"
+                [options]="categorias()"
+                [(ngModel)]="categoriaSeleccionada"
+                optionLabel="nombre"
+                optionValue="_id"
+                placeholder="Selecciona"
+              />
+            </div>
+          </div>
+        </div>
+
+        <p-button
+          [label]="editandoId ? 'Guardar cambios' : 'Guardar producto'"
+          icon="pi pi-check"
+          type="submit"
+          styleClass="w-full"
+        />
+        @if (editandoId) {
+        <p-button
+          label="Cancelar edición"
+          icon="pi pi-times"
+          [text]="true"
+          type="button"
+          styleClass="w-full"
+          (onClick)="cancelarEdicion()"
+        />
+        }
+      </form>
+
+      <p-divider></p-divider>
+
+      <div class="flex flex-column gap-2">
+        <div class="text-lg font-semibold">Crear categoría</div>
+        <div class="text-sm text-color-secondary">
+          Organiza los productos a tu manera.
+        </div>
+        <form (ngSubmit)="crearCategoria()" class="flex gap-2">
+          <input
+            pInputText
+            name="nuevaCategoria"
+            [(ngModel)]="nombreNuevaCategoria"
+            placeholder="Nueva categoría"
+            maxlength="40"
+            required
+            class="flex-1"
+          />
+          <p-button icon="pi pi-plus" type="submit" [rounded]="true" />
+        </form>
+      </div>
+
+      <p-divider></p-divider>
+
+      <div class="flex gap-2 p-3 surface-50 border-round">
+        <i class="pi pi-star-fill text-primary"></i>
+        <div class="text-sm">
+          <div class="font-semibold">Un pequeño consejo</div>
+          <div class="text-color-secondary mt-1">
+            Guarda aquí tus productos frecuentes para añadirlos a futuras
+            compras con un solo toque.
+          </div>
         </div>
       </div>
+    </p-card>
+  </div>
 
-      <button class="primary-button full-button" type="submit">
-        {{ editandoId ? '✓ Guardar cambios' : '＋ Guardar producto' }}
-      </button>
+  <div class="col-12 lg:col-8">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="flex align-items-center justify-content-between p-3">
+          <div>
+            <div class="text-sm text-primary font-semibold">
+              TU DESPENSA DIGITAL
+            </div>
+            <div class="text-2xl font-bold">
+              Mis productos
+              <span class="text-color-secondary"
+                >({{ productos().length }})</span
+              >
+            </div>
+            <div class="text-sm text-color-secondary">
+              Tu catálogo personal, siempre a mano.
+            </div>
+          </div>
+          <i class="pi pi-th-large text-4xl text-primary"></i>
+        </div>
+      </ng-template>
 
-      @if (editandoId) {
-        <button class="text-button full-button" type="button" (click)="cancelarEdicion()">
-          Cancelar edición
-        </button>
-      }
-    </form>
-
-    <div class="divider"></div>
-
-    <div class="category-add">
-      <h3>Crear categoría</h3>
-      <p>Organiza los productos a tu manera.</p>
-      <form class="category-form" (ngSubmit)="crearCategoria()">
-        <input
-          name="nuevaCategoria"
-          [(ngModel)]="nombreNuevaCategoria"
-          placeholder="Nueva categoría"
-          maxlength="40"
-          required
-        />
-        <button type="submit" aria-label="Añadir categoría">＋</button>
-      </form>
-    </div>
-
-    <div class="tip-box">
-      <span>✦</span>
-      <p>
-        <strong>Un pequeño consejo</strong><br />
-        Guarda aquí tus productos frecuentes para añadirlos a futuras compras con un
-        solo toque.
-      </p>
-    </div>
-  </aside>
-
-  <section class="catalog">
-    <div class="catalog-heading">
-      <div>
-        <div class="section-kicker">TU DESPENSA DIGITAL</div>
-        <h2>Mis productos <span class="subtle-count">{{ productos().length }}</span></h2>
-        <p>Tu catálogo personal, siempre a mano.</p>
-      </div>
-      <div class="catalog-symbol">▦</div>
-    </div>
-
-    <div class="filters">
-      <div class="search-box">
-        <span>⌕</span>
-        <input
-          aria-label="Buscar productos"
-          [ngModel]="busqueda()"
-          (ngModelChange)="busqueda.set($event)"
-          placeholder="Buscar producto..."
-        />
-      </div>
-      <select
-        aria-label="Filtrar por categoría"
-        [ngModel]="filtroCategoria()"
-        (ngModelChange)="filtroCategoria.set($event)"
-      >
-        <option value="todas">Todas las categorías</option>
-        @for (categoria of categorias(); track categoria._id) {
+      <div class="flex flex-column md:flex-row gap-2 mb-3">
+        <div class="search-box flex-1">
+          <span>⌕</span>
+          <input
+            aria-label="Buscar productos"
+            [ngModel]="busqueda()"
+            (ngModelChange)="busqueda.set($event)"
+            placeholder="Buscar producto..."
+          />
+        </div>
+        <!-- <select
+          aria-label="Filtrar por categoría"
+          [ngModel]="filtroCategoria()"
+          (ngModelChange)="filtroCategoria.set($event)"
+          style="
+            height: 42px;
+            border: 1px solid #dfe7e2;
+            border-radius: 8px;
+            padding: 0 11px;
+            background: #fff;
+            color: var(--ink);
+            font-size: 12px;
+          "
+        >
+          <option value="todas">Todas las categorías</option>
+          @for (categoria of categorias(); track categoria._id) {
           <option [value]="categoria._id">{{ categoria.nombre }}</option>
-        }
-      </select>
-    </div>
+          }
+        </select> -->
 
-    @if (cargando()) {
-      <div class="empty-state">
-        <div class="empty-illustration">🛒</div>
-        <h3>Cargando tu catálogo…</h3>
-        <p>Estamos recuperando tus productos guardados.</p>
+        <!-- <p-select
+          class="p-0"
+          inputId="productoCategoria"
+          name="productoCategoria"n
+          [options]="categorias()"
+          [ngModel]="filtroCategoria()"
+          optionLabel="nombre"
+          optionValue="_id"s
+          placeholder="Selecciona"
+          (ngModelChange)="filtroCategoria.set($event)"
+        /> -->
+        <p-select
+          class="p-0"
+          inputId="productoCategoria"
+          name="productoCategoria"
+          [options]="opcionesFiltroCategoria()"
+          [ngModel]="filtroCategoria()"
+          optionLabel="nombre"
+          optionValue="valor"
+          placeholder="Selecciona"
+          (ngModelChange)="filtroCategoria.set($event)"
+        />
       </div>
-    } @else if (productosFiltrados().length) {
-      <div class="product-grid">
+
+      @if (cargando()) {
+      <div
+        class="flex flex-column align-items-center justify-content-center py-8 gap-2"
+      >
+        <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+        <div class="text-xl font-semibold">Cargando tu catálogo…</div>
+        <div class="text-color-secondary">
+          Estamos recuperando tus productos guardados.
+        </div>
+      </div>
+      } @else if (productosFiltrados().length) {
+      <div class="grid">
         @for (producto of productosFiltrados(); track producto._id) {
-          <article class="product-card">
-            <div class="product-card-top">
-              <span class="product-emoji">{{ iconoCategoria(producto) }}</span>
-              <button
-                class="more-button"
-                type="button"
-                (click)="editarProducto(producto)"
-                aria-label="Editar producto"
-              >
-                ✎
-              </button>
+        <div class="col-12 md:col-6 xl:col-4">
+          <p-card styleClass="h-full">
+            <ng-template pTemplate="header">
+              <div class="flex align-items-center justify-content-between p-3">
+                <span class="text-2xl">{{ iconoCategoria(producto) }}</span>
+                <p-button
+                  icon="pi pi-pencil"
+                  [text]="true"
+                  [rounded]="true"
+                  (onClick)="editarProducto(producto)"
+                  aria-label="Editar producto"
+                />
+              </div>
+            </ng-template>
+            <div class="flex flex-column gap-2">
+              <div class="text-sm text-primary">
+                {{ nombreCategoria(producto) }}
+              </div>
+              <div class="text-lg font-semibold">{{ producto.nombre }}</div>
+              <div class="flex align-items-center justify-content-between mt-2">
+                <div class="text-xl font-bold">
+                  {{ producto.precio | currency: 'EUR' : 'symbol' : '1.2-2' :
+                  'es' }}
+                </div>
+                <p-button
+                  icon="pi pi-plus"
+                  [rounded]="true"
+                  (onClick)="anadirALista(producto)"
+                  aria-label="Añadir a la lista"
+                />
+              </div>
+              <p-button
+                label="Eliminar"
+                icon="pi pi-trash"
+                [text]="true"
+                severity="danger"
+                (onClick)="eliminarProducto(producto)"
+                styleClass="p-0"
+              />
             </div>
-            <div class="product-category">{{ nombreCategoria(producto) }}</div>
-            <h3>{{ producto.nombre }}</h3>
-            <div class="product-card-bottom">
-              <strong>{{ producto.precio | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }}</strong>
-              <button
-                class="add-button"
-                type="button"
-                (click)="anadirALista(producto)"
-                aria-label="Añadir a la lista"
-                title="Añadir a la lista"
-              >
-                ＋
-              </button>
-            </div>
-            <button class="delete-link" type="button" (click)="eliminarProducto(producto)">
-              Eliminar
-            </button>
-          </article>
+          </p-card>
+        </div>
         }
       </div>
-    } @else {
-      <div class="empty-state">
-        <div class="empty-illustration">🧺</div>
-        <h3>
-          {{
-            busqueda() || filtroCategoria() !== 'todas'
-              ? 'No hay resultados'
-              : 'Tu catálogo empieza aquí'
-          }}
-        </h3>
-        <p>
-          {{
-            busqueda() || filtroCategoria() !== 'todas'
-              ? 'Prueba con otra búsqueda o categoría.'
-              : 'Añade tus productos habituales con su precio y categoría. Después podrás incorporarlos a tu lista de la compra.'
-          }}
-        </p>
+      } @else {
+      <div
+        class="flex flex-column align-items-center justify-content-center py-8 gap-3 text-center"
+      >
+        <div
+          class="flex align-items-center justify-content-center border-circle bg-primary-50"
+          style="width: 4rem; height: 4rem"
+        >
+          <i class="pi pi-inbox text-3xl text-primary"></i>
+        </div>
+        <div class="text-xl font-bold">
+          {{ busqueda() || filtroCategoria() !== 'todas' ? 'No hay resultados' :
+          'Tu catálogo empieza aquí' }}
+        </div>
+        <div class="text-color-secondary max-w-30rem">
+          {{ busqueda() || filtroCategoria() !== 'todas' ? 'Prueba con otra
+          búsqueda o categoría.' : 'Añade tus productos habituales con su precio
+          y categoría. Después podrás incorporarlos a tu lista de la compra.' }}
+        </div>
         @if (!busqueda() && filtroCategoria() === 'todas') {
-          <button class="primary-button" type="button" (click)="enfocarFormulario()">
-            Añade tu primer producto en el formulario
-          </button>
+        <p-button
+          label="Añade tu primer producto en el formulario"
+          icon="pi pi-plus"
+          (onClick)="enfocarFormulario()"
+        />
         }
       </div>
-    }
+      }
 
-    <div class="catalog-footer">
-      <span><span class="footer-dot"></span> {{ productos().length }} productos guardados</span>
-      <span>Los precios los defines tú</span>
-    </div>
-  </section>
-</section>
+      <p-divider></p-divider>
+      <div
+        class="flex align-items-center justify-content-between text-sm text-color-secondary"
+      >
+        <span>{{ productos().length }} productos guardados</span>
+        <span>Los precios los defines tú</span>
+      </div>
+    </p-card>
+  </div>
+</div>

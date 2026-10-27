@@ -55,6 +55,16 @@
   white-space: nowrap;
 }
 
+.lista-selector {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+}
+
 .shopping-items {
   border-top: 1px solid var(--line);
 }

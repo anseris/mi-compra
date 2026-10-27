@@ -2,6 +2,7 @@ import { Schema, model, type Types } from 'mongoose';
 
 export interface IItemLista {
   _id: string;
+  listaId: Types.ObjectId | null;
   /** Producto del catálogo del que se copió el artículo (null si es manual). */
   productoId: Types.ObjectId | null;
   /** Categoría del producto (null si es manual). */
@@ -19,6 +20,11 @@ export interface IItemLista {
 
 const itemListaSchema = new Schema<IItemLista>(
   {
+    listaId: {
+      type: Schema.Types.ObjectId,
+      ref: 'ListaCompra',
+      default: null,
+    },
     productoId: {
       type: Schema.Types.ObjectId,
       ref: 'Producto',
@@ -70,5 +76,6 @@ const itemListaSchema = new Schema<IItemLista>(
 
 itemListaSchema.index({ comprado: 1 });
 itemListaSchema.index({ productoId: 1 });
+itemListaSchema.index({ listaId: 1, comprado: 1 });
 
 export const ItemLista = model<IItemLista>('ItemLista', itemListaSchema);
