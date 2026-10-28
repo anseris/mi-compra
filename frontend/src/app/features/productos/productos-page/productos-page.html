@@ -120,10 +120,9 @@
       </div>
 
       @if (vista() === 'cards') {
-      <div class="grid">
+      <div class="product-grid">
         @for (producto of productosFiltrados(); track producto._id) {
         <div
-          class="col-12 md:col-6 xl:col-4"
           [class.product-added-card]="productoEnLista(producto)"
         >
           <p-card styleClass="h-full">
@@ -167,10 +166,11 @@
                   'es' }}
                 </div>
                 <p-button
-                  [icon]="productoEnLista(producto) ? 'pi pi-check' : 'pi pi-plus'"
+                  [icon]="productoEnLista(producto) ? 'pi pi-minus' : 'pi pi-plus'"
+                  [severity]="productoEnLista(producto) ? 'danger' : 'primary'"
                   [rounded]="true"
-                  (onClick)="anadirALista(producto)"
-                  [ariaLabel]="productoEnLista(producto) ? 'Añadir otra unidad a la lista' : 'Añadir a la lista'"
+                  (onClick)="alternarProductoEnLista(producto)"
+                  [ariaLabel]="productoEnLista(producto) ? 'Quitar de la lista' : 'Añadir a la lista'"
                 />
               </div>
             </div>
@@ -203,10 +203,11 @@
           </div>
           <div class="flex align-items-center gap-1">
             <p-button
-              [icon]="productoEnLista(producto) ? 'pi pi-check' : 'pi pi-plus'"
+              [icon]="productoEnLista(producto) ? 'pi pi-minus' : 'pi pi-plus'"
+              [severity]="productoEnLista(producto) ? 'danger' : 'primary'"
               [rounded]="true"
-              (onClick)="anadirALista(producto)"
-              [ariaLabel]="productoEnLista(producto) ? 'Añadir otra unidad a la lista' : 'Añadir a la lista'"
+              (onClick)="alternarProductoEnLista(producto)"
+              [ariaLabel]="productoEnLista(producto) ? 'Quitar de la lista' : 'Añadir a la lista'"
             />
             <p-button
               icon="pi pi-pencil"

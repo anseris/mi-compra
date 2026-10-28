@@ -245,22 +245,28 @@ export class ProductosPage implements OnInit {
     });
   }
 
-  anadirALista(producto: Producto): void {
+  alternarProductoEnLista(producto: Producto): void {
     this.error.set("");
+    const itemExistente = this.listaService
+      .items()
+      .find((item) => item.productoId === producto._id);
+
+    if (itemExistente) {
+      this.listaService.eliminar(itemExistente._id).subscribe({
+        next: () => this.mostrarAviso(`«${producto.nombre}» quitado de la lista.`),
+        error: (error: unknown) =>
+          this.error.set(mensajeError(error, "No se pudo quitar el producto de la lista.")),
+      });
+      return;
+    }
 
     this.listaService.crear({ productoId: producto._id }).subscribe({
-      next: (item) => {
+      next: () =>
         this.mostrarAviso(
-          item.cantidad > 1
-            ? `«${producto.nombre}» añadido otra vez. Ya tienes ${item.cantidad} en «${this.listaService.listaSeleccionada()?.nombre ?? "la lista"}».`
-            : `«${producto.nombre}» añadido a «${this.listaService.listaSeleccionada()?.nombre ?? "la lista"}».`,
-        );
-      },
-      error: (error: unknown) => {
-        this.error.set(
-          mensajeError(error, "No se pudo añadir el producto a la lista."),
-        );
-      },
+          `«${producto.nombre}» añadido a «${this.listaService.listaSeleccionada()?.nombre ?? "la lista"}».`,
+        ),
+      error: (error: unknown) =>
+        this.error.set(mensajeError(error, "No se pudo añadir el producto a la lista.")),
     });
   }
 
