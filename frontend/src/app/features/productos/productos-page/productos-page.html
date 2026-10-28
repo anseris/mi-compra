@@ -314,14 +314,38 @@
         </div>
       </div>
       } @else if (productosFiltrados().length) {
+      <div class="flex justify-content-end gap-2 mb-3" role="group" aria-label="Vista del catálogo">
+        <p-button
+          label="Tarjetas"
+          icon="pi pi-th-large"
+          [outlined]="vista() !== 'cards'"
+          [attr.aria-pressed]="vista() === 'cards'"
+          (onClick)="vista.set('cards')"
+        />
+        <p-button
+          label="Listado"
+          icon="pi pi-list"
+          [outlined]="vista() !== 'listado'"
+          [attr.aria-pressed]="vista() === 'listado'"
+          (onClick)="vista.set('listado')"
+        />
+      </div>
+
+      @if (vista() === 'cards') {
       <div class="grid">
         @for (producto of productosFiltrados(); track producto._id) {
-        <div class="col-12 md:col-6 xl:col-4">
+        <div
+          class="col-12 md:col-6 xl:col-4"
+          [class.product-added-card]="productoEnLista(producto)"
+        >
           <p-card styleClass="h-full">
             <ng-template pTemplate="header">
               <div class="flex align-items-center justify-content-between p-2">
                 <span class="text-2xl">{{ iconoCategoria(producto) }}</span>
                 <div class="flex align-items-center gap-1">
+                  @if (productoEnLista(producto)) {
+                  <span class="product-added-label">En la lista</span>
+                  }
                   <p-button
                     icon="pi pi-pencil"
                     [text]="true"
@@ -355,10 +379,10 @@
                   'es' }}
                 </div>
                 <p-button
-                  icon="pi pi-plus"
+                  [icon]="productoEnLista(producto) ? 'pi pi-check' : 'pi pi-plus'"
                   [rounded]="true"
                   (onClick)="anadirALista(producto)"
-                  aria-label="Añadir a la lista"
+                  [ariaLabel]="productoEnLista(producto) ? 'Añadir otra unidad a la lista' : 'Añadir a la lista'"
                 />
               </div>
             </div>
@@ -366,6 +390,56 @@
         </div>
         }
       </div>
+      } @else {
+      <div class="flex flex-column gap-2">
+        @for (producto of productosFiltrados(); track producto._id) {
+        <div
+          class="product-list-item flex align-items-center gap-3 p-3 border-1 border-round"
+          [class.product-list-item-added]="productoEnLista(producto)"
+        >
+          <span class="text-2xl product-list-icon">{{ iconoCategoria(producto) }}</span>
+          <div class="flex-1 min-w-0">
+            <div class="flex align-items-center flex-wrap gap-2">
+              <span class="font-semibold">{{ producto.nombre }}</span>
+              @if (productoEnLista(producto)) {
+              <span class="product-added-label">En la lista</span>
+              }
+            </div>
+            <div class="text-sm text-primary mt-1">{{ nombreCategoria(producto) }}</div>
+            <div class="text-sm text-color-secondary">
+              {{ nombreSeccion(producto) }}@if (producto.subseccion) { · {{ producto.subseccion }}}
+            </div>
+          </div>
+          <div class="text-lg font-bold white-space-nowrap">
+            {{ producto.precio | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }}
+          </div>
+          <div class="flex align-items-center gap-1">
+            <p-button
+              [icon]="productoEnLista(producto) ? 'pi pi-check' : 'pi pi-plus'"
+              [rounded]="true"
+              (onClick)="anadirALista(producto)"
+              [ariaLabel]="productoEnLista(producto) ? 'Añadir otra unidad a la lista' : 'Añadir a la lista'"
+            />
+            <p-button
+              icon="pi pi-pencil"
+              [text]="true"
+              [rounded]="true"
+              (onClick)="editarProducto(producto)"
+              aria-label="Editar producto"
+            />
+            <p-button
+              icon="pi pi-trash"
+              [text]="true"
+              [rounded]="true"
+              severity="danger"
+              (onClick)="eliminarProducto(producto)"
+              aria-label="Eliminar producto"
+            />
+          </div>
+        </div>
+        }
+      </div>
+      }
       } @else {
       <div
         class="flex flex-column align-items-center justify-content-center py-8 gap-3 text-center"

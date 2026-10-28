@@ -45,6 +45,15 @@ export class ProductosPage implements OnInit {
   readonly productos = this.productosService.productos;
   readonly categorias = this.categoriasService.categorias;
   readonly secciones = this.seccionesService.secciones;
+  readonly vista = signal<"cards" | "listado">("cards");
+  readonly productosEnLista = computed(
+    () =>
+      new Set(
+        this.listaService
+          .items()
+          .flatMap((item) => (item.productoId ? [item.productoId] : [])),
+      ),
+  );
   readonly cargando = computed(
     () =>
       this.productosService.cargando() ||
@@ -204,6 +213,14 @@ export class ProductosPage implements OnInit {
         );
       },
     });
+
+    this.listaService.cargar().subscribe({
+      error: (error: unknown) => {
+        this.error.set(
+          mensajeError(error, "No se pudo cargar el estado de la lista."),
+        );
+      },
+    });
   }
 
   cambiarSeccion(seccionId: string): void {
@@ -291,6 +308,10 @@ export class ProductosPage implements OnInit {
 
   iconoCategoria(producto: Producto): string {
     return this.categoriaDe(producto)?.icono ?? "🛍️";
+  }
+
+  productoEnLista(producto: Producto): boolean {
+    return this.productosEnLista().has(producto._id);
   }
 
   guardarProducto(): void {

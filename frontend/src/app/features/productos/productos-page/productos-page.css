@@ -226,6 +226,39 @@
   min-width: 10rem;
 }
 
+:host ::ng-deep .product-added-card .p-card {
+  border: 1px solid #9ed5b5;
+  background: #f0faf4;
+}
+
+.product-added-label {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: #d9f1e2;
+  color: #176b43;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.product-list-item {
+  border-color: var(--line);
+  background: #fff;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.product-list-item-added {
+  border-color: #9ed5b5;
+  background: #f0faf4;
+}
+
+.product-list-icon {
+  flex: 0 0 2.5rem;
+  text-align: center;
+}
+
 .product-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -416,5 +449,23 @@
 
   .field-row {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .product-list-item {
+    flex-wrap: wrap;
+  }
+
+  .product-list-item > .flex-1 {
+    flex-basis: calc(100% - 3.5rem);
+  }
+
+  .product-list-item > .text-lg {
+    margin-left: 3.5rem;
+  }
+
+  .product-list-item > .flex:last-child {
+    margin-left: auto;
   }
 }
