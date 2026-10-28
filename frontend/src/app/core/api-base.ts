@@ -28,16 +28,16 @@ function esEntornoLocal(): boolean {
   );
 }
 
-function obtenerApiProduccion(): string {
-  const apiHost = window.__MI_COMPRA_CONFIG__?.apiHost?.trim();
+// function obtenerApiProduccion(): string {
+//   const apiHost = window.__MI_COMPRA_CONFIG__?.apiHost?.trim();
 
-  if (!apiHost) {
-    return `${window.location.origin}/api`;
-  }
+//   if (!apiHost) {
+//     return `${window.location.origin}/api`;
+//   }
 
-  const origen = /^https?:\/\//i.test(apiHost) ? apiHost : `https://${apiHost}`;
-  return `${origen.replace(/\/+$/, "")}/api`;
-}
+//   const origen = /^https?:\/\//i.test(apiHost) ? apiHost : `https://${apiHost}`;
+//   return `${origen.replace(/\/+$/, "")}/api`;
+// }
 
 export const API_BASE = esEntornoLocal()
   ? "http://localhost:3000/api"
