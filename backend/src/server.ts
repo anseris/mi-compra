@@ -14,7 +14,7 @@ function validarVariablesEntorno(): void {
   if (faltantes.length > 0) {
     throw new Error(
       `Faltan variables de entorno obligatorias: ${faltantes.join(', ')}. ` +
-        'Configúralas en backend/.env.',
+        'Configura MONGODB_URI en Environment del servicio de Render o en backend/.env para desarrollo local.',
     );
   }
 }
