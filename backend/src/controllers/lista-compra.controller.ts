@@ -10,6 +10,10 @@ function cantidadValida(value: unknown): number | null {
   return Number.isFinite(cantidad) && cantidad >= 1 ? cantidad : null;
 }
 
+function escaparExpresionRegular(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // GET /api/lista — listar la lista de la compra
 export const getItems = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -59,17 +63,19 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Si ya está pendiente, solo se aumenta la cantidad.
+    const palabrasNombre = producto.nombre.trim().replace(/\s+/g, ' ').split(' ');
+    const nombreCoincidente = palabrasNombre
+      .map(escaparExpresionRegular)
+      .join('\\s+');
     const existente = await ItemLista.findOne({
       listaId: lista._id,
-      productoId: producto._id,
-      comprado: false,
+      nombre: { $regex: `^\\s*${nombreCoincidente}\\s*$`, $options: 'i' },
     });
 
     if (existente) {
-      existente.cantidad += cantidad;
-      await existente.save();
-      res.status(200).json(existente);
+      res.status(409).json({
+        mensaje: `«${producto.nombre}» ya está en la lista.`,
+      });
       return;
     }
 

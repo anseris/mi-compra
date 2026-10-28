@@ -166,12 +166,22 @@
                   'es' }}
                 </div>
                 <p-button
-                  [icon]="productoEnLista(producto) ? 'pi pi-minus' : 'pi pi-plus'"
-                  [severity]="productoEnLista(producto) ? 'danger' : 'primary'"
+                  [icon]="productoEnLista(producto) ? 'pi pi-check' : 'pi pi-plus'"
+                  [label]="productoEnLista(producto) ? 'Añadido' : undefined"
                   [rounded]="true"
-                  (onClick)="alternarProductoEnLista(producto)"
-                  [ariaLabel]="productoEnLista(producto) ? 'Quitar de la lista' : 'Añadir a la lista'"
+                  (onClick)="anadirALista(producto)"
+                  [ariaLabel]="productoEnLista(producto) ? 'Avisar que ya está añadido' : 'Añadir a la lista'"
                 />
+                @if (productoEnLista(producto)) {
+                <p-button
+                  icon="pi pi-minus"
+                  [text]="true"
+                  [rounded]="true"
+                  severity="danger"
+                  (onClick)="quitarDeLista(producto)"
+                  aria-label="Quitar de la lista"
+                />
+                }
               </div>
             </div>
           </p-card>
@@ -203,12 +213,22 @@
           </div>
           <div class="flex align-items-center gap-1">
             <p-button
-              [icon]="productoEnLista(producto) ? 'pi pi-minus' : 'pi pi-plus'"
-              [severity]="productoEnLista(producto) ? 'danger' : 'primary'"
+              [icon]="productoEnLista(producto) ? 'pi pi-check' : 'pi pi-plus'"
+              [label]="productoEnLista(producto) ? 'Añadido' : undefined"
               [rounded]="true"
-              (onClick)="alternarProductoEnLista(producto)"
-              [ariaLabel]="productoEnLista(producto) ? 'Quitar de la lista' : 'Añadir a la lista'"
+              (onClick)="anadirALista(producto)"
+              [ariaLabel]="productoEnLista(producto) ? 'Avisar que ya está añadido' : 'Añadir a la lista'"
             />
+            @if (productoEnLista(producto)) {
+            <p-button
+              icon="pi pi-minus"
+              [text]="true"
+              [rounded]="true"
+              severity="danger"
+              (onClick)="quitarDeLista(producto)"
+              aria-label="Quitar de la lista"
+            />
+            }
             <p-button
               icon="pi pi-pencil"
               [text]="true"

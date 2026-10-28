@@ -77,6 +77,16 @@ export class CatalogoModalesComponent implements OnInit {
 
   ngOnInit(): void {
     this.categoriasService.cargar().subscribe({
+      next: (categorias) => {
+        const modal = this.modal();
+        if (
+          modal?.tipo === "producto" &&
+          !modal.producto &&
+          !this.categoriaSeleccionada
+        ) {
+          this.categoriaSeleccionada = categorias[0]?._id ?? "";
+        }
+      },
       error: (error: unknown) =>
         this.error.set(mensajeError(error, "No se pudieron cargar las categorías.")),
     });
@@ -94,6 +104,9 @@ export class CatalogoModalesComponent implements OnInit {
   }
 
   cerrarModal(): void {
+    if (this.modal()?.tipo === "producto") {
+      this.limpiarFormularioProducto();
+    }
     this.modalesService.cerrar();
     this.error.set("");
   }

@@ -15,6 +15,11 @@ import { CardModule } from "primeng/card";
 import { InputTextModule } from "primeng/inputtext";
 import { MessageModule } from "primeng/message";
 import { DividerModule } from "primeng/divider";
+import { finalize } from "rxjs";
+
+function claveNombreProducto(nombre: string): string {
+  return nombre.trim().replace(/\s+/g, " ").toLocaleLowerCase("es");
+}
 
 @Component({
   selector: "app-productos-page",
@@ -47,9 +52,11 @@ export class ProductosPage implements OnInit {
       new Set(
         this.listaService
           .items()
-          .flatMap((item) => (item.productoId ? [item.productoId] : [])),
+          .map((item) => claveNombreProducto(item.nombre))
+          .filter(Boolean),
       ),
   );
+  readonly productosAnadiendo = signal(new Set<string>());
   readonly cargando = computed(
     () =>
       this.productosService.cargando() ||
@@ -217,7 +224,7 @@ export class ProductosPage implements OnInit {
   }
 
   productoEnLista(producto: Producto): boolean {
-    return this.productosEnLista().has(producto._id);
+    return this.productosEnLista().has(claveNombreProducto(producto.nombre));
   }
 
   editarProducto(producto: Producto): void {
@@ -245,28 +252,67 @@ export class ProductosPage implements OnInit {
     });
   }
 
-  alternarProductoEnLista(producto: Producto): void {
+  anadirALista(producto: Producto): void {
     this.error.set("");
-    const itemExistente = this.listaService
-      .items()
-      .find((item) => item.productoId === producto._id);
+    const claveNombre = claveNombreProducto(producto.nombre);
 
-    if (itemExistente) {
-      this.listaService.eliminar(itemExistente._id).subscribe({
-        next: () => this.mostrarAviso(`«${producto.nombre}» quitado de la lista.`),
-        error: (error: unknown) =>
-          this.error.set(mensajeError(error, "No se pudo quitar el producto de la lista.")),
-      });
+    if (this.productoEnLista(producto)) {
+      this.mostrarAviso(
+        `«${producto.nombre}» ya está en la lista y no se ha añadido otra vez.`,
+      );
       return;
     }
 
-    this.listaService.crear({ productoId: producto._id }).subscribe({
-      next: () =>
-        this.mostrarAviso(
-          `«${producto.nombre}» añadido a «${this.listaService.listaSeleccionada()?.nombre ?? "la lista"}».`,
+    if (this.productosAnadiendo().has(claveNombre)) {
+      this.mostrarAviso(`«${producto.nombre}» se está añadiendo a la lista.`);
+      return;
+    }
+
+    this.productosAnadiendo.update((productos) =>
+      new Set(productos).add(claveNombre),
+    );
+    this.listaService
+      .crear({ productoId: producto._id })
+      .pipe(
+        finalize(() =>
+          this.productosAnadiendo.update((productos) => {
+            const siguientes = new Set(productos);
+            siguientes.delete(claveNombre);
+            return siguientes;
+          }),
         ),
+      )
+      .subscribe({
+        next: () =>
+          this.mostrarAviso(
+            `«${producto.nombre}» añadido a «${this.listaService.listaSeleccionada()?.nombre ?? "la lista"}».`,
+          ),
+        error: (error: unknown) =>
+          this.error.set(
+            mensajeError(error, "No se pudo añadir el producto a la lista."),
+          ),
+      });
+  }
+
+  quitarDeLista(producto: Producto): void {
+    this.error.set("");
+    const item = this.listaService
+      .items()
+      .find(
+        (actual) =>
+          claveNombreProducto(actual.nombre) ===
+          claveNombreProducto(producto.nombre),
+      );
+    if (!item) {
+      return;
+    }
+
+    this.listaService.eliminar(item._id).subscribe({
+      next: () => this.mostrarAviso(`«${producto.nombre}» quitado de la lista.`),
       error: (error: unknown) =>
-        this.error.set(mensajeError(error, "No se pudo añadir el producto a la lista.")),
+        this.error.set(
+          mensajeError(error, "No se pudo quitar el producto de la lista."),
+        ),
     });
   }
 
