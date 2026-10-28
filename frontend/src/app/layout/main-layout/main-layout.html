@@ -46,7 +46,31 @@
       </a>
     </nav>
 
+    <div class="layout-catalog-actions" aria-label="Acciones del catálogo">
+      <button class="catalog-action primary" type="button" (click)="abrirProducto()">
+        <span aria-hidden="true">＋</span> Añadir producto
+      </button>
+      <button class="catalog-action" type="button" (click)="abrirCategoria()">
+        <span aria-hidden="true">▦</span> Crear categoría
+      </button>
+      <button class="catalog-action" type="button" (click)="abrirSecciones()">
+        <span aria-hidden="true">☷</span> Gestionar secciones
+      </button>
+    </div>
+
     <router-outlet></router-outlet>
+
+    @if (error()) {
+    <div class="layout-error" role="alert">{{ error() }}</div>
+    }
+
+    @if (aviso()) {
+    <div class="layout-notice" role="status">{{ aviso() }}</div>
+    }
+
+    @defer (when modal()) {
+      <app-catalogo-modales />
+    }
 
     <footer class="app-footer">
       <span>Hecho para comprar con más tranquilidad <span class="heart">♥</span></span>

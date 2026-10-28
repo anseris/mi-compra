@@ -1,5 +1,4 @@
 import { SelectModule } from "primeng/select";
-import { InputNumberModule } from "primeng/inputnumber";
 import { CurrencyPipe } from "@angular/common";
 import { Component, computed, inject, OnInit, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
@@ -10,11 +9,10 @@ import { CategoriasService } from "../../../core/services/categorias.service";
 import { ListaCompraService } from "../../../core/services/lista-compra.service";
 import { ProductosService } from "../../../core/services/productos.service";
 import { SeccionesService } from "../../../core/services/secciones.service";
+import { CatalogoModalesService } from "../../../core/services/catalogo-modales.service";
 import { mensajeError } from "../../../shared/utils/api-error";
 import { CardModule } from "primeng/card";
 import { InputTextModule } from "primeng/inputtext";
-import { IconFieldModule } from "primeng/iconfield";
-import { InputIconModule } from "primeng/inputicon";
 import { MessageModule } from "primeng/message";
 import { DividerModule } from "primeng/divider";
 
@@ -27,9 +25,6 @@ import { DividerModule } from "primeng/divider";
     CardModule,
     SelectModule,
     InputTextModule,
-    InputNumberModule,
-    IconFieldModule,
-    InputIconModule,
     MessageModule,
     DividerModule,
   ],
@@ -41,6 +36,7 @@ export class ProductosPage implements OnInit {
   private readonly categoriasService = inject(CategoriasService);
   private readonly seccionesService = inject(SeccionesService);
   private readonly listaService = inject(ListaCompraService);
+  private readonly modalesService = inject(CatalogoModalesService);
 
   readonly productos = this.productosService.productos;
   readonly categorias = this.categoriasService.categorias;
@@ -106,13 +102,6 @@ export class ProductosPage implements OnInit {
     ];
   });
 
-  readonly opcionesSubseccionFormulario = computed(
-    () =>
-      this.secciones().find(
-        (seccion) => seccion._id === this.seccionSeleccionada(),
-      )?.subsecciones ?? [],
-  );
-
   readonly categoriasPorId = computed(
     () =>
       new Map(this.categorias().map((categoria) => [categoria._id, categoria])),
@@ -172,27 +161,8 @@ export class ProductosPage implements OnInit {
       this.filtroSubseccion() !== "todas",
   );
 
-  // Campos del formulario de producto.
-  nombreProducto = "";
-  precio: number | null = null;
-  categoriaSeleccionada = "";
-  readonly seccionSeleccionada = signal("");
-  subseccionSeleccionada = "";
-  editandoId: string | null = null;
-  nombreNuevaSeccion = "";
-  readonly seccionParaSubseccion = signal("");
-  nombreNuevaSubseccion = "";
-
-  // Campo del formulario de categoría.
-  nombreNuevaCategoria = "";
-
   ngOnInit(): void {
     this.categoriasService.cargar().subscribe({
-      next: (categorias) => {
-        if (!this.categoriaSeleccionada && categorias.length > 0) {
-          this.categoriaSeleccionada = categorias[0]?._id ?? "";
-        }
-      },
       error: (error: unknown) => {
         this.error.set(
           mensajeError(error, "No se pudieron cargar las categorías."),
@@ -218,70 +188,6 @@ export class ProductosPage implements OnInit {
       error: (error: unknown) => {
         this.error.set(
           mensajeError(error, "No se pudo cargar el estado de la lista."),
-        );
-      },
-    });
-  }
-
-  cambiarSeccion(seccionId: string): void {
-    this.seccionSeleccionada.set(seccionId);
-
-    if (
-      !this.opcionesSubseccionFormulario().includes(
-        this.subseccionSeleccionada,
-      )
-    ) {
-      this.subseccionSeleccionada = "";
-    }
-  }
-
-  crearSeccion(): void {
-    const nombre = this.nombreNuevaSeccion.trim();
-
-    if (!nombre) {
-      this.error.set("Escribe el nombre de la sección.");
-      return;
-    }
-
-    this.error.set("");
-    this.seccionesService.crear(nombre).subscribe({
-      next: (seccion) => {
-        this.nombreNuevaSeccion = "";
-        this.seccionParaSubseccion.set(seccion._id);
-        this.mostrarAviso(`Sección «${seccion.nombre}» creada.`);
-      },
-      error: (error: unknown) => {
-        this.error.set(mensajeError(error, "No se pudo crear la sección."));
-      },
-    });
-  }
-
-  crearSubseccion(): void {
-    const seccionId = this.seccionParaSubseccion();
-    const nombre = this.nombreNuevaSubseccion.trim();
-
-    if (!seccionId) {
-      this.error.set("Selecciona la sección de la nueva subsección.");
-      return;
-    }
-
-    if (!nombre) {
-      this.error.set("Escribe el nombre de la subsección.");
-      return;
-    }
-
-    this.error.set("");
-    this.seccionesService.crearSubseccion(seccionId, nombre).subscribe({
-      next: (seccion) => {
-        this.nombreNuevaSubseccion = "";
-        if (this.seccionSeleccionada() === seccion._id) {
-          this.subseccionSeleccionada = nombre;
-        }
-        this.mostrarAviso(`Subsección «${nombre}» añadida a «${seccion.nombre}».`);
-      },
-      error: (error: unknown) => {
-        this.error.set(
-          mensajeError(error, "No se pudo crear la subsección."),
         );
       },
     });
@@ -314,80 +220,8 @@ export class ProductosPage implements OnInit {
     return this.productosEnLista().has(producto._id);
   }
 
-  guardarProducto(): void {
-    this.error.set("");
-
-    const nombre = this.nombreProducto.trim();
-    const precio = Number(this.precio);
-
-    if (!nombre) {
-      this.error.set("Escribe el nombre del producto.");
-      return;
-    }
-
-    if (this.precio === null || !Number.isFinite(precio) || precio < 0) {
-      this.error.set("Indica un precio válido (0 o más).");
-      return;
-    }
-
-    if (!this.categoriaSeleccionada) {
-      this.error.set("Crea o selecciona una categoría.");
-      return;
-    }
-
-    if (!this.editandoId && !this.seccionSeleccionada()) {
-      this.error.set("Selecciona una sección.");
-      return;
-    }
-
-    const datosBase = {
-      nombre,
-      precio,
-      categoria: this.categoriaSeleccionada,
-    };
-
-    const seccion = this.seccionSeleccionada();
-    const datosSeccion = seccion
-      ? { seccion, subseccion: this.subseccionSeleccionada }
-      : {};
-    const peticion = this.editandoId
-      ? this.productosService.actualizar(this.editandoId, {
-          ...datosBase,
-          ...datosSeccion,
-        })
-      : this.productosService.crear({
-          ...datosBase,
-          seccion,
-          subseccion: this.subseccionSeleccionada,
-        });
-
-    peticion.subscribe({
-      next: (producto) => {
-        this.mostrarAviso(
-          this.editandoId
-            ? `«${producto.nombre}» actualizado.`
-            : `«${producto.nombre}» añadido al catálogo.`,
-        );
-        this.resetFormulario();
-      },
-      error: (error: unknown) => {
-        this.error.set(mensajeError(error, "No se pudo guardar el producto."));
-      },
-    });
-  }
-
   editarProducto(producto: Producto): void {
-    this.editandoId = producto._id;
-    this.nombreProducto = producto.nombre;
-    this.precio = producto.precio;
-    this.categoriaSeleccionada = producto.categoria;
-    this.seccionSeleccionada.set(producto.seccion ?? "");
-    this.subseccionSeleccionada = producto.subseccion ?? "";
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  cancelarEdicion(): void {
-    this.resetFormulario();
+    this.modalesService.abrirProducto(producto);
   }
 
   eliminarProducto(producto: Producto): void {
@@ -403,10 +237,6 @@ export class ProductosPage implements OnInit {
 
     this.productosService.eliminar(producto._id).subscribe({
       next: () => {
-        if (this.editandoId === producto._id) {
-          this.resetFormulario();
-        }
-
         this.mostrarAviso(`«${producto.nombre}» eliminado del catálogo.`);
       },
       error: (error: unknown) => {
@@ -434,51 +264,8 @@ export class ProductosPage implements OnInit {
     });
   }
 
-  crearCategoria(): void {
-    this.error.set("");
-
-    const nombre = this.nombreNuevaCategoria.trim();
-
-    if (!nombre) {
-      return;
-    }
-
-    const yaExiste = this.categorias().some(
-      (categoria) =>
-        categoria.nombre.toLocaleLowerCase("es") ===
-        nombre.toLocaleLowerCase("es"),
-    );
-
-    if (yaExiste) {
-      this.error.set("Ya existe una categoría con ese nombre.");
-      return;
-    }
-
-    this.categoriasService.crear({ nombre, icono: "🛍️" }).subscribe({
-      next: (categoria) => {
-        this.categoriaSeleccionada = categoria._id;
-        this.nombreNuevaCategoria = "";
-        this.mostrarAviso(`Categoría «${categoria.nombre}» creada.`);
-      },
-      error: (error: unknown) => {
-        this.error.set(mensajeError(error, "No se pudo crear la categoría."));
-      },
-    });
-  }
-
-  enfocarFormulario(): void {
-    const input = document.getElementById("productoNombre");
-    input?.scrollIntoView({ behavior: "smooth", block: "center" });
-    input?.focus();
-  }
-
-  private resetFormulario(): void {
-    this.nombreProducto = "";
-    this.precio = null;
-    this.categoriaSeleccionada = this.categorias()[0]?._id ?? "";
-    this.seccionSeleccionada.set("");
-    this.subseccionSeleccionada = "";
-    this.editandoId = null;
+  abrirNuevoProducto(): void {
+    this.modalesService.abrirProducto();
   }
 
   private mostrarAviso(texto: string): void {

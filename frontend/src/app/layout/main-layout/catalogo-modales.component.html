@@ -1,0 +1,203 @@
+<p-dialog
+  [header]="editandoId ? 'Editar producto' : 'Añadir producto'"
+  [visible]="modal()?.tipo === 'producto'"
+  (visibleChange)="!$event && cerrarModal()"
+  [modal]="true"
+  [style]="{ width: 'min(34rem, 94vw)' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  @if (error()) {
+    <p-message severity="error" styleClass="w-full mb-3">
+      <span>{{ error() }}</span>
+    </p-message>
+  }
+  <form (ngSubmit)="guardarProducto()" class="flex flex-column gap-3">
+    <!-- Primera línea: Nombre del producto -->
+    <div class="flex flex-column gap-2">
+      <label for="modalProductoNombre">Nombre del producto</label>
+      <input
+        id="modalProductoNombre"
+        pInputText
+        name="modalProductoNombre"
+        [(ngModel)]="nombreProducto"
+        placeholder="Ej. Leche semidesnatada"
+        required
+        maxlength="100"
+        class="w-full"
+      />
+    </div>
+
+    <!-- Segunda línea: Sección y subsección -->
+    <div class="grid">
+      <div class="col-12 md:col-6 flex flex-column gap-2">
+        <label for="modalProductoSeccion">Sección</label>
+        <p-select
+          class="w-full p-0"
+          inputId="modalProductoSeccion"
+          name="modalProductoSeccion"
+          [options]="secciones()"
+          [ngModel]="seccionSeleccionada()"
+          (ngModelChange)="cambiarSeccion($event)"
+          optionLabel="nombre"
+          optionValue="_id"
+          placeholder="Selecciona"
+          [disabled]="!secciones().length"
+          styleClass="w-full"
+        />
+      </div>
+
+      <div class="col-12 md:col-6 flex flex-column gap-2">
+        <label for="modalProductoSubseccion">Subsección</label>
+        <p-select
+          class="w-full p-0"
+          inputId="modalProductoSubseccion"
+          name="modalProductoSubseccion"
+          [options]="opcionesSubseccionFormulario()"
+          [(ngModel)]="subseccionSeleccionada"
+          placeholder="Sin subsección"
+          [showClear]="true"
+          [disabled]="!opcionesSubseccionFormulario().length"
+          styleClass="w-full"
+        />
+      </div>
+    </div>
+
+    <!-- Tercera línea: Categoría y precio -->
+    <div class="grid">
+      <div class="col-12 md:col-6 flex flex-column gap-2">
+        <label for="modalProductoCategoria">Categoría</label>
+        <p-select
+          class="w-full p-0"
+          inputId="modalProductoCategoria"
+          name="modalProductoCategoria"
+          [options]="categorias()"
+          [(ngModel)]="categoriaSeleccionada"
+          optionLabel="nombre"
+          optionValue="_id"
+          placeholder="Selecciona"
+          styleClass="w-full"
+        />
+      </div>
+
+      <div class="col-12 md:col-6 flex flex-column gap-2">
+        <label for="modalProductoPrecio">Precio (€)</label>
+        <p-inputNumber
+          inputId="modalProductoPrecio"
+          name="modalProductoPrecio"
+          [(ngModel)]="precio"
+          mode="decimal"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="2"
+          [min]="0"
+          placeholder="0,00"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+        />
+      </div>
+    </div>
+
+    <!-- Botón para guardar -->
+    <p-button
+      [label]="editandoId ? 'Guardar cambios' : 'Guardar producto'"
+      icon="pi pi-check"
+      type="submit"
+      styleClass="w-full"
+    />
+  </form>
+</p-dialog>
+
+<p-dialog
+  header="Crear categoría"
+  [visible]="modal()?.tipo === 'categoria'"
+  (visibleChange)="!$event && cerrarModal()"
+  [modal]="true"
+  [style]="{ width: 'min(28rem, 94vw)' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  @if (error()) {
+    <p-message severity="error" styleClass="w-full mb-3">
+      <span>{{ error() }}</span>
+    </p-message>
+  }
+  <form (ngSubmit)="crearCategoria()" class="flex flex-column gap-3">
+    <label for="modalNuevaCategoria">Nombre de la categoría</label>
+    <input
+      id="modalNuevaCategoria"
+      pInputText
+      name="modalNuevaCategoria"
+      [(ngModel)]="nombreNuevaCategoria"
+      placeholder="Nueva categoría"
+      maxlength="40"
+      required
+    />
+    <p-button label="Crear categoría" icon="pi pi-plus" type="submit" />
+  </form>
+</p-dialog>
+
+<p-dialog
+  header="Gestionar secciones"
+  [visible]="modal()?.tipo === 'secciones'"
+  (visibleChange)="!$event && cerrarModal()"
+  [modal]="true"
+  [style]="{ width: 'min(32rem, 94vw)' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  @if (error()) {
+    <p-message severity="error" styleClass="w-full mb-3">
+      <span>{{ error() }}</span>
+    </p-message>
+  }
+  <div class="flex flex-column gap-3">
+    <form (ngSubmit)="crearSeccion()" class="flex flex-column gap-2">
+      <label for="modalNuevaSeccion">Crear sección</label>
+      <div class="flex gap-2">
+        <input
+          id="modalNuevaSeccion"
+          pInputText
+          name="modalNuevaSeccion"
+          [(ngModel)]="nombreNuevaSeccion"
+          placeholder="Nueva sección"
+          maxlength="40"
+          required
+          class="flex-1"
+        />
+        <p-button icon="pi pi-plus" type="submit" ariaLabel="Crear sección" />
+      </div>
+    </form>
+    <form (ngSubmit)="crearSubseccion()" class="flex flex-column gap-2">
+      <label for="modalSeccionParaSubseccion">Añadir subsección</label>
+      <p-select
+        class="w-full p-0"
+        inputId="modalSeccionParaSubseccion"
+        name="modalSeccionParaSubseccion"
+        [options]="secciones()"
+        [ngModel]="seccionParaSubseccion()"
+        (ngModelChange)="seccionParaSubseccion.set($event)"
+        optionLabel="nombre"
+        optionValue="_id"
+        placeholder="Selecciona una sección"
+      />
+      <div class="flex gap-2">
+        <input
+          pInputText
+          name="modalNuevaSubseccion"
+          [(ngModel)]="nombreNuevaSubseccion"
+          placeholder="Nueva subsección"
+          aria-label="Nombre de la nueva subsección"
+          maxlength="40"
+          required
+          class="flex-1"
+        />
+        <p-button
+          icon="pi pi-plus"
+          type="submit"
+          [disabled]="!secciones().length"
+          ariaLabel="Crear subsección"
+        />
+      </div>
+    </form>
+  </div>
+</p-dialog>
