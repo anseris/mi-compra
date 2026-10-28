@@ -118,6 +118,8 @@ Todas las rutas son públicas y no requieren cabeceras de autenticación.
 | `GET` | `/api/health` | Comprueba que la API está funcionando. |
 | `GET` | `/api/categorias` | Lista las categorías. |
 | `GET` | `/api/secciones` | Lista las secciones y sus subsecciones. |
+| `POST` | `/api/secciones` | Crea una sección. |
+| `POST` | `/api/secciones/:id/subsecciones` | Añade una subsección a la sección indicada. |
 | `POST` | `/api/categorias` | Crea una categoría. |
 | `PUT` | `/api/categorias/:id` | Modifica una categoría. |
 | `DELETE` | `/api/categorias/:id` | Elimina una categoría sin productos asociados. |
@@ -151,6 +153,7 @@ La lista guarda una **copia** de los datos del producto para que eliminar un pro
 - Productos clasificados por sección y subsección, con filtros dependientes en el catálogo.
 - Creación de categorías propias; la base de datos recibe 9 categorías iniciales la primera vez.
 - Lista de la compra con cantidades, marcado de comprados, búsqueda y totales.
+- Filtros de lista por sección y subsección, además de categoría.
 - Creación y selección de varias listas de compra, con sus artículos guardados por separado.
 - Los cambios se guardan en MongoDB y se comparten entre dispositivos.
 
