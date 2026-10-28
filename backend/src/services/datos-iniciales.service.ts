@@ -1,4 +1,5 @@
 import { Categoria } from '../models/categoria.model.js';
+import { Seccion } from '../models/seccion.model.js';
 
 /**
  * Categorías que se crean automáticamente la primera vez que se arranca la API.
@@ -16,6 +17,21 @@ export const CATEGORIAS_POR_DEFECTO = [
   { nombre: 'Otros', icono: '🛒', color: '#6B7280' },
 ] as const;
 
+export const SECCIONES_POR_DEFECTO = [
+  { nombre: 'Entrada', subsecciones: ['E1', 'E2', 'E3', 'E4'] },
+  { nombre: 'Centro', subsecciones: ['C1', 'C2', 'C3', 'C4'] },
+  { nombre: 'Fondo', subsecciones: ['F1'] },
+  { nombre: 'Frutería', subsecciones: [] },
+  { nombre: 'Verduras', subsecciones: [] },
+  { nombre: 'Quesos', subsecciones: [] },
+  { nombre: 'Envasados', subsecciones: [] },
+  { nombre: 'Congelados', subsecciones: [] },
+  { nombre: 'Panadería', subsecciones: [] },
+  { nombre: 'Pescadería', subsecciones: [] },
+  { nombre: 'Carnicería', subsecciones: [] },
+  { nombre: 'Charcutería', subsecciones: [] },
+] as const;
+
 /** Crea las categorías base si todavía no existe ninguna. */
 export async function crearCategoriasPorDefecto(): Promise<void> {
   const existe = await Categoria.exists({});
@@ -25,4 +41,23 @@ export async function crearCategoriasPorDefecto(): Promise<void> {
   }
 
   await Categoria.insertMany(CATEGORIAS_POR_DEFECTO.map((categoria) => ({ ...categoria })));
+}
+
+/** Inserta o actualiza las secciones iniciales sin sobrescribir datos propios. */
+export async function crearSeccionesPorDefecto(): Promise<void> {
+  await Seccion.bulkWrite(
+    SECCIONES_POR_DEFECTO.map((seccion, orden) => ({
+      updateOne: {
+        filter: { nombre: seccion.nombre },
+        update: {
+          $setOnInsert: {
+            nombre: seccion.nombre,
+            subsecciones: [...seccion.subsecciones],
+            orden,
+          },
+        },
+        upsert: true,
+      },
+    })),
+  );
 }

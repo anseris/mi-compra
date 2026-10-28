@@ -9,6 +9,7 @@ import type { Producto } from "../../../core/models/producto.model";
 import { CategoriasService } from "../../../core/services/categorias.service";
 import { ListaCompraService } from "../../../core/services/lista-compra.service";
 import { ProductosService } from "../../../core/services/productos.service";
+import { SeccionesService } from "../../../core/services/secciones.service";
 import { mensajeError } from "../../../shared/utils/api-error";
 import { CardModule } from "primeng/card";
 import { InputTextModule } from "primeng/inputtext";
@@ -38,18 +39,25 @@ import { DividerModule } from "primeng/divider";
 export class ProductosPage implements OnInit {
   private readonly productosService = inject(ProductosService);
   private readonly categoriasService = inject(CategoriasService);
+  private readonly seccionesService = inject(SeccionesService);
   private readonly listaService = inject(ListaCompraService);
 
   readonly productos = this.productosService.productos;
   readonly categorias = this.categoriasService.categorias;
+  readonly secciones = this.seccionesService.secciones;
   readonly cargando = computed(
-    () => this.productosService.cargando() || this.categoriasService.cargando(),
+    () =>
+      this.productosService.cargando() ||
+      this.categoriasService.cargando() ||
+      this.seccionesService.cargando(),
   );
 
   readonly error = signal("");
   readonly aviso = signal("");
   readonly busqueda = signal("");
   readonly filtroCategoria = signal("todas");
+  readonly filtroSeccion = signal("todas");
+  readonly filtroSubseccion = signal("todas");
 
   readonly opcionesFiltroCategoria = computed(() => [
     { nombre: "Todas las categorías", valor: "todas" },
@@ -59,35 +67,108 @@ export class ProductosPage implements OnInit {
     })),
   ]);
 
+  readonly opcionesFiltroSeccion = computed(() => [
+    { nombre: "Todas las secciones", valor: "todas" },
+    ...this.secciones().map((seccion) => ({
+      nombre: seccion.nombre,
+      valor: seccion._id,
+    })),
+    { nombre: "Sin sección", valor: "sin-seccion" },
+  ]);
+
+  readonly opcionesFiltroSubseccion = computed(() => {
+    if (
+      this.filtroSeccion() === "todas" ||
+      this.filtroSeccion() === "sin-seccion"
+    ) {
+      return [{ nombre: "Todas las subsecciones", valor: "todas" }];
+    }
+
+    const seccion = this.secciones().find(
+      (actual) => actual._id === this.filtroSeccion(),
+    );
+
+    return [
+      { nombre: "Todas las subsecciones", valor: "todas" },
+      ...(seccion?.subsecciones ?? []).map((subseccion) => ({
+        nombre: subseccion,
+        valor: subseccion,
+      })),
+    ];
+  });
+
+  readonly opcionesSubseccionFormulario = computed(
+    () =>
+      this.secciones().find(
+        (seccion) => seccion._id === this.seccionSeleccionada(),
+      )?.subsecciones ?? [],
+  );
+
   readonly categoriasPorId = computed(
     () =>
       new Map(this.categorias().map((categoria) => [categoria._id, categoria])),
   );
 
+  readonly seccionesPorId = computed(
+    () => new Map(this.secciones().map((seccion) => [seccion._id, seccion])),
+  );
+
   readonly productosFiltrados = computed(() => {
     const consulta = this.busqueda().trim().toLocaleLowerCase("es");
-    const filtro = this.filtroCategoria();
+    const filtroCategoria = this.filtroCategoria();
+    const filtroSeccion = this.filtroSeccion();
+    const filtroSubseccion = this.filtroSubseccion();
     const categorias = this.categoriasPorId();
+    const secciones = this.seccionesPorId();
 
     return this.productos().filter((producto) => {
       const categoria = categorias.get(producto.categoria);
       const nombreCategoria = categoria?.nombre ?? "";
+      const seccion = producto.seccion
+        ? secciones.get(producto.seccion)
+        : undefined;
+      const nombreSeccion = seccion?.nombre ?? "";
 
       const coincideTexto =
         !consulta ||
         producto.nombre.toLocaleLowerCase("es").includes(consulta) ||
-        nombreCategoria.toLocaleLowerCase("es").includes(consulta);
+        nombreCategoria.toLocaleLowerCase("es").includes(consulta) ||
+        nombreSeccion.toLocaleLowerCase("es").includes(consulta) ||
+        (producto.subseccion ?? "").toLocaleLowerCase("es").includes(consulta);
       const coincideCategoria =
-        filtro === "todas" || producto.categoria === filtro;
+        filtroCategoria === "todas" || producto.categoria === filtroCategoria;
+      const coincideSeccion =
+        filtroSeccion === "todas" ||
+        (filtroSeccion === "sin-seccion"
+          ? !producto.seccion
+          : producto.seccion === filtroSeccion);
+      const coincideSubseccion =
+        filtroSubseccion === "todas" ||
+        producto.subseccion === filtroSubseccion;
 
-      return coincideTexto && coincideCategoria;
+      return (
+        coincideTexto &&
+        coincideCategoria &&
+        coincideSeccion &&
+        coincideSubseccion
+      );
     });
   });
+
+  readonly hayFiltrosActivos = computed(
+    () =>
+      Boolean(this.busqueda().trim()) ||
+      this.filtroCategoria() !== "todas" ||
+      this.filtroSeccion() !== "todas" ||
+      this.filtroSubseccion() !== "todas",
+  );
 
   // Campos del formulario de producto.
   nombreProducto = "";
   precio: number | null = null;
   categoriaSeleccionada = "";
+  readonly seccionSeleccionada = signal("");
+  subseccionSeleccionada = "";
   editandoId: string | null = null;
 
   // Campo del formulario de categoría.
@@ -112,6 +193,31 @@ export class ProductosPage implements OnInit {
         this.error.set(mensajeError(error, "No se pudo cargar el catálogo."));
       },
     });
+
+    this.seccionesService.cargar().subscribe({
+      error: (error: unknown) => {
+        this.error.set(
+          mensajeError(error, "No se pudieron cargar las secciones."),
+        );
+      },
+    });
+  }
+
+  cambiarSeccion(seccionId: string): void {
+    this.seccionSeleccionada.set(seccionId);
+
+    if (
+      !this.opcionesSubseccionFormulario().includes(
+        this.subseccionSeleccionada,
+      )
+    ) {
+      this.subseccionSeleccionada = "";
+    }
+  }
+
+  cambiarFiltroSeccion(seccionId: string): void {
+    this.filtroSeccion.set(seccionId);
+    this.filtroSubseccion.set("todas");
   }
 
   categoriaDe(producto: Producto): Categoria | undefined {
@@ -120,6 +226,12 @@ export class ProductosPage implements OnInit {
 
   nombreCategoria(producto: Producto): string {
     return this.categoriaDe(producto)?.nombre ?? "Sin categoría";
+  }
+
+  nombreSeccion(producto: Producto): string {
+    return producto.seccion
+      ? this.seccionesPorId().get(producto.seccion)?.nombre ?? "Sin sección"
+      : "Sin sección";
   }
 
   iconoCategoria(producto: Producto): string {
@@ -147,15 +259,31 @@ export class ProductosPage implements OnInit {
       return;
     }
 
-    const datos = {
+    if (!this.editandoId && !this.seccionSeleccionada()) {
+      this.error.set("Selecciona una sección.");
+      return;
+    }
+
+    const datosBase = {
       nombre,
       precio,
       categoria: this.categoriaSeleccionada,
     };
 
+    const seccion = this.seccionSeleccionada();
+    const datosSeccion = seccion
+      ? { seccion, subseccion: this.subseccionSeleccionada }
+      : {};
     const peticion = this.editandoId
-      ? this.productosService.actualizar(this.editandoId, datos)
-      : this.productosService.crear(datos);
+      ? this.productosService.actualizar(this.editandoId, {
+          ...datosBase,
+          ...datosSeccion,
+        })
+      : this.productosService.crear({
+          ...datosBase,
+          seccion,
+          subseccion: this.subseccionSeleccionada,
+        });
 
     peticion.subscribe({
       next: (producto) => {
@@ -177,6 +305,8 @@ export class ProductosPage implements OnInit {
     this.nombreProducto = producto.nombre;
     this.precio = producto.precio;
     this.categoriaSeleccionada = producto.categoria;
+    this.seccionSeleccionada.set(producto.seccion ?? "");
+    this.subseccionSeleccionada = producto.subseccion ?? "";
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -270,6 +400,8 @@ export class ProductosPage implements OnInit {
     this.nombreProducto = "";
     this.precio = null;
     this.categoriaSeleccionada = this.categorias()[0]?._id ?? "";
+    this.seccionSeleccionada.set("");
+    this.subseccionSeleccionada = "";
     this.editandoId = null;
   }
 

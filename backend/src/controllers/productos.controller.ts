@@ -1,8 +1,9 @@
 import type { Request, Response } from 'express';
-import type { Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { Categoria } from '../models/categoria.model.js';
 import { ItemLista } from '../models/item-lista.model.js';
 import { Producto } from '../models/producto.model.js';
+import { Seccion } from '../models/seccion.model.js';
 
 function nombreValido(value: unknown): string | null {
   const nombre = String(value ?? '').trim();
@@ -27,6 +28,19 @@ async function categoriaValida(
   } catch {
     return null;
   }
+}
+
+async function seccionValida(seccionId: unknown) {
+  if (typeof seccionId !== 'string' || !Types.ObjectId.isValid(seccionId)) {
+    return null;
+  }
+
+  return Seccion.findById(seccionId);
+}
+
+function subseccionValida(value: unknown, subsecciones: string[]): string | null {
+  const subseccion = String(value ?? '').trim();
+  return !subseccion || subsecciones.includes(subseccion) ? subseccion : null;
 }
 
 // GET /api/productos — listar el catálogo
@@ -63,6 +77,10 @@ export const createProducto = async (req: Request, res: Response): Promise<void>
     const nombre = nombreValido(req.body?.nombre);
     const precio = precioValido(req.body?.precio);
     const categoria = await categoriaValida(req.body?.categoria);
+    const seccion = await seccionValida(req.body?.seccion);
+    const subseccion = seccion
+      ? subseccionValida(req.body?.subseccion, seccion.subsecciones)
+      : null;
 
     if (!nombre) {
       res.status(400).json({ mensaje: 'El nombre del producto es obligatorio.' });
@@ -79,10 +97,22 @@ export const createProducto = async (req: Request, res: Response): Promise<void>
       return;
     }
 
+    if (!seccion) {
+      res.status(400).json({ mensaje: 'Selecciona una sección válida.' });
+      return;
+    }
+
+    if (subseccion === null) {
+      res.status(400).json({ mensaje: 'Selecciona una subsección válida para esa sección.' });
+      return;
+    }
+
     const producto = await Producto.create({
       nombre,
       precio,
       categoria: categoria._id,
+      seccion: seccion._id,
+      subseccion,
     });
 
     res.status(201).json(producto);
@@ -128,6 +158,43 @@ export const updateProducto = async (req: Request, res: Response): Promise<void>
       }
 
       cambios['categoria'] = categoria._id;
+    }
+
+    if (req.body?.seccion !== undefined || req.body?.subseccion !== undefined) {
+      const actual = await Producto.findById(req.params['id']).select('seccion subseccion');
+
+      if (!actual) {
+        res.status(404).json({ mensaje: 'Producto no encontrado.' });
+        return;
+      }
+
+      const seccionCambiada = req.body?.seccion !== undefined;
+      const seccion = seccionCambiada
+        ? await seccionValida(req.body.seccion)
+        : actual.seccion
+          ? await Seccion.findById(actual.seccion)
+          : null;
+
+      if (!seccion) {
+        res.status(400).json({ mensaje: 'Selecciona una sección válida.' });
+        return;
+      }
+
+      const valorSubseccion =
+        req.body?.subseccion !== undefined
+          ? req.body.subseccion
+          : seccionCambiada && String(actual.seccion) !== String(seccion._id)
+            ? ''
+            : actual.subseccion;
+      const subseccion = subseccionValida(valorSubseccion, seccion.subsecciones);
+
+      if (subseccion === null) {
+        res.status(400).json({ mensaje: 'Selecciona una subsección válida para esa sección.' });
+        return;
+      }
+
+      cambios['seccion'] = seccion._id;
+      cambios['subseccion'] = subseccion;
     }
 
     const producto = await Producto.findOneAndUpdate({ _id: req.params['id'] }, cambios, {

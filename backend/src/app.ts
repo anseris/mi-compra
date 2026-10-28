@@ -4,6 +4,7 @@ import categoriasRoutes from "./routes/categorias.routes.js";
 import productosRoutes from "./routes/productos.routes.js";
 import listaCompraRoutes from "./routes/lista-compra.routes.js";
 import listasCompraRoutes from "./routes/listas-compra.routes.js";
+import seccionesRoutes from "./routes/secciones.routes.js";
 
 const app = express();
 
@@ -53,5 +54,6 @@ app.use("/api/categorias", categoriasRoutes);
 app.use("/api/productos", productosRoutes);
 app.use("/api/lista", listaCompraRoutes);
 app.use("/api/listas", listasCompraRoutes);
+app.use("/api/secciones", seccionesRoutes);
 
 export default app;

@@ -5,6 +5,10 @@ export interface Producto {
   precio: number;
   /** Id de la categoría a la que pertenece el producto. */
   categoria: string;
+  /** Id de la sección del supermercado. */
+  seccion?: string | null;
+  /** Subsección dentro de la sección, si corresponde. */
+  subseccion?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -14,6 +18,8 @@ export interface CrearProducto {
   nombre: string;
   precio: number;
   categoria: string;
+  seccion: string;
+  subseccion?: string;
 }
 
 /** Cuerpo para modificar un producto (PUT): todos los campos son opcionales. */

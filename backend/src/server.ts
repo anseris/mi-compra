@@ -1,7 +1,10 @@
 import 'dotenv/config';
 import app from './app.js';
 import { connectDatabase } from './config/database.js';
-import { crearCategoriasPorDefecto } from './services/datos-iniciales.service.js';
+import {
+  crearCategoriasPorDefecto,
+  crearSeccionesPorDefecto,
+} from './services/datos-iniciales.service.js';
 
 const port = Number(process.env['PORT'] ?? 3000);
 
@@ -26,6 +29,7 @@ async function startServer(): Promise<void> {
 
   // La aplicación no tiene cuentas: las categorías iniciales se crean una sola vez.
   await crearCategoriasPorDefecto();
+  await crearSeccionesPorDefecto();
 
   app.listen(port, '0.0.0.0', () => {
     console.log(`Servidor de Mi compra iniciado en http://localhost:${port}`);

@@ -84,6 +84,41 @@
           </div>
         </div>
 
+        <div class="grid align-items-end">
+          <div class="col-12 md:col-6">
+            <div class="flex flex-column gap-2">
+              <label for="productoSeccion">Sección</label>
+              <p-select
+                class="p-0 w-full"
+                inputId="productoSeccion"
+                name="productoSeccion"
+                [options]="secciones()"
+                [ngModel]="seccionSeleccionada()"
+                (ngModelChange)="cambiarSeccion($event)"
+                optionLabel="nombre"
+                optionValue="_id"
+                placeholder="Selecciona"
+                [disabled]="!secciones().length"
+              />
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="flex flex-column gap-2">
+              <label for="productoSubseccion">Subsección</label>
+              <p-select
+                class="p-0 w-full"
+                inputId="productoSubseccion"
+                name="productoSubseccion"
+                [options]="opcionesSubseccionFormulario()"
+                [(ngModel)]="subseccionSeleccionada"
+                placeholder="Sin subsección"
+                [showClear]="true"
+                [disabled]="!opcionesSubseccionFormulario().length"
+              />
+            </div>
+          </div>
+        </div>
+
         <p-button
           [label]="editandoId ? 'Guardar cambios' : 'Guardar producto'"
           icon="pi pi-check"
@@ -160,7 +195,7 @@
         </div>
       </ng-template>
 
-      <div class="flex flex-column md:flex-row gap-2 mb-3">
+      <div class="flex flex-column md:flex-row md:flex-wrap gap-2 mb-3">
         <div class="search-box flex-1">
           <span>⌕</span>
           <input
@@ -170,47 +205,43 @@
             placeholder="Buscar producto..."
           />
         </div>
-        <!-- <select
-          aria-label="Filtrar por categoría"
-          [ngModel]="filtroCategoria()"
-          (ngModelChange)="filtroCategoria.set($event)"
-          style="
-            height: 42px;
-            border: 1px solid #dfe7e2;
-            border-radius: 8px;
-            padding: 0 11px;
-            background: #fff;
-            color: var(--ink);
-            font-size: 12px;
-          "
-        >
-          <option value="todas">Todas las categorías</option>
-          @for (categoria of categorias(); track categoria._id) {
-          <option [value]="categoria._id">{{ categoria.nombre }}</option>
-          }
-        </select> -->
 
-        <!-- <p-select
-          class="p-0"
-          inputId="productoCategoria"
-          name="productoCategoria"n
-          [options]="categorias()"
-          [ngModel]="filtroCategoria()"
-          optionLabel="nombre"
-          optionValue="_id"s
-          placeholder="Selecciona"
-          (ngModelChange)="filtroCategoria.set($event)"
-        /> -->
         <p-select
-          class="p-0"
-          inputId="productoCategoria"
-          name="productoCategoria"
+          class="p-0 w-full md:w-14rem"
+          inputId="filtroProductoCategoria"
+          name="filtroProductoCategoria"
           [options]="opcionesFiltroCategoria()"
           [ngModel]="filtroCategoria()"
+          (ngModelChange)="filtroCategoria.set($event)"
           optionLabel="nombre"
           optionValue="valor"
-          placeholder="Selecciona"
-          (ngModelChange)="filtroCategoria.set($event)"
+          placeholder="Todas las categorías"
+          ariaLabel="Filtrar por categoría"
+        />
+        <p-select
+          class="p-0 w-full md:w-14rem"
+          inputId="filtroProductoSeccion"
+          name="filtroProductoSeccion"
+          [options]="opcionesFiltroSeccion()"
+          [ngModel]="filtroSeccion()"
+          (ngModelChange)="cambiarFiltroSeccion($event)"
+          optionLabel="nombre"
+          optionValue="valor"
+          placeholder="Todas las secciones"
+          ariaLabel="Filtrar por sección"
+        />
+        <p-select
+          class="p-0 w-full md:w-14rem"
+          inputId="filtroProductoSubseccion"
+          name="filtroProductoSubseccion"
+          [options]="opcionesFiltroSubseccion()"
+          [ngModel]="filtroSubseccion()"
+          (ngModelChange)="filtroSubseccion.set($event)"
+          optionLabel="nombre"
+          optionValue="valor"
+          placeholder="Todas las subsecciones"
+          ariaLabel="Filtrar por subsección"
+          [disabled]="filtroSeccion() === 'todas' || filtroSeccion() === 'sin-seccion' || opcionesFiltroSubseccion().length === 1"
         />
       </div>
 
@@ -244,6 +275,9 @@
             <div class="flex flex-column gap-2">
               <div class="text-sm text-primary">
                 {{ nombreCategoria(producto) }}
+              </div>
+              <div class="text-sm text-color-secondary">
+                {{ nombreSeccion(producto) }}@if (producto.subseccion) { · {{ producto.subseccion }}}
               </div>
               <div class="text-lg font-semibold">{{ producto.nombre }}</div>
               <div class="flex align-items-center justify-content-between mt-2">
@@ -282,15 +316,14 @@
           <i class="pi pi-inbox text-3xl text-primary"></i>
         </div>
         <div class="text-xl font-bold">
-          {{ busqueda() || filtroCategoria() !== 'todas' ? 'No hay resultados' :
+          {{ hayFiltrosActivos() ? 'No hay resultados' :
           'Tu catálogo empieza aquí' }}
         </div>
         <div class="text-color-secondary max-w-30rem">
-          {{ busqueda() || filtroCategoria() !== 'todas' ? 'Prueba con otra
-          búsqueda o categoría.' : 'Añade tus productos habituales con su precio
+          {{ hayFiltrosActivos() ? 'Prueba con otra búsqueda o combinación de filtros.' : 'Añade tus productos habituales con su precio
           y categoría. Después podrás incorporarlos a tu lista de la compra.' }}
         </div>
-        @if (!busqueda() && filtroCategoria() === 'todas') {
+        @if (!hayFiltrosActivos()) {
         <p-button
           label="Añade tu primer producto en el formulario"
           icon="pi pi-plus"

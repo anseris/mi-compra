@@ -6,6 +6,10 @@ export interface IProducto {
   precio: number;
   /** Id de la categoría a la que pertenece el producto. */
   categoria: Types.ObjectId;
+  /** Sección física del supermercado. */
+  seccion: Types.ObjectId | null;
+  /** Subsección dentro de la sección, si corresponde. */
+  subseccion: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -28,6 +32,16 @@ const productoSchema = new Schema<IProducto>(
       ref: 'Categoria',
       required: true,
     },
+    seccion: {
+      type: Schema.Types.ObjectId,
+      ref: 'Seccion',
+      default: null,
+    },
+    subseccion: {
+      type: String,
+      trim: true,
+      default: '',
+    },
   },
   {
     timestamps: true,
@@ -37,5 +51,6 @@ const productoSchema = new Schema<IProducto>(
 
 productoSchema.index({ nombre: 1 });
 productoSchema.index({ categoria: 1 });
+productoSchema.index({ seccion: 1, subseccion: 1 });
 
 export const Producto = model<IProducto>('Producto', productoSchema);

@@ -117,6 +117,7 @@ Todas las rutas son públicas y no requieren cabeceras de autenticación.
 | --- | --- | --- |
 | `GET` | `/api/health` | Comprueba que la API está funcionando. |
 | `GET` | `/api/categorias` | Lista las categorías. |
+| `GET` | `/api/secciones` | Lista las secciones y sus subsecciones. |
 | `POST` | `/api/categorias` | Crea una categoría. |
 | `PUT` | `/api/categorias/:id` | Modifica una categoría. |
 | `DELETE` | `/api/categorias/:id` | Elimina una categoría sin productos asociados. |
@@ -136,8 +137,10 @@ Todas las rutas son públicas y no requieren cabeceras de autenticación.
 ## Modelo de datos
 
 - **categorias:** nombre único, emoji y color.
-- **productos:** nombre, precio y referencia a la categoría.
+- **secciones:** sección y sus subsecciones (Entrada/E1-E4, Centro/C1-C4, Fondo/F1 y secciones sin subsecciones).
+- **productos:** nombre, precio, referencias a categoría y sección, y subsección opcional.
 - **listas_compra:** nombre de cada lista y marca de lista predeterminada.
+- **secciones:** sección, orden de presentación y subsecciones disponibles.
 - **lista_compra:** referencia a la lista y al producto, copia de nombre/precio/categoría, cantidad y estado de comprado.
 
 La lista guarda una **copia** de los datos del producto para que eliminar un producto del catálogo no rompa la compra en curso. Al editar un producto o una categoría, el backend sincroniza los artículos que ya están en la lista.
@@ -145,6 +148,7 @@ La lista guarda una **copia** de los datos del producto para que eliminar un pro
 ## Comportamiento de la aplicación
 
 - Catálogo con búsqueda, filtro por categoría, edición y borrado.
+- Productos clasificados por sección y subsección, con filtros dependientes en el catálogo.
 - Creación de categorías propias; la base de datos recibe 9 categorías iniciales la primera vez.
 - Lista de la compra con cantidades, marcado de comprados, búsqueda y totales.
 - Creación y selección de varias listas de compra, con sus artículos guardados por separado.
