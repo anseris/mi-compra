@@ -15,7 +15,7 @@ import { CardModule } from "primeng/card";
 import { InputTextModule } from "primeng/inputtext";
 import { MessageModule } from "primeng/message";
 import { DividerModule } from "primeng/divider";
-import { finalize } from "rxjs";
+import { EMPTY, finalize, switchMap } from "rxjs";
 
 function claveNombreProducto(nombre: string): string {
   return nombre.trim().replace(/\s+/g, " ").toLocaleLowerCase("es");
@@ -256,13 +256,6 @@ export class ProductosPage implements OnInit {
     this.error.set("");
     const claveNombre = claveNombreProducto(producto.nombre);
 
-    if (this.productoEnLista(producto)) {
-      this.mostrarAviso(
-        `«${producto.nombre}» ya está en la lista y no se ha añadido otra vez.`,
-      );
-      return;
-    }
-
     if (this.productosAnadiendo().has(claveNombre)) {
       this.mostrarAviso(`«${producto.nombre}» se está añadiendo a la lista.`);
       return;
@@ -272,7 +265,23 @@ export class ProductosPage implements OnInit {
       new Set(productos).add(claveNombre),
     );
     this.listaService
-      .crear({ productoId: producto._id })
+      .cargar()
+      .pipe(
+        switchMap((items) => {
+          const nombreYaExiste = items.some(
+            (item) =>
+              claveNombreProducto(item.nombre) === claveNombre,
+          );
+          if (nombreYaExiste) {
+            this.mostrarAviso(
+              `«${producto.nombre}» ya está en la lista y no se ha añadido otra vez.`,
+            );
+            return EMPTY;
+          }
+
+          return this.listaService.crear({ productoId: producto._id });
+        }),
+      )
       .pipe(
         finalize(() =>
           this.productosAnadiendo.update((productos) => {

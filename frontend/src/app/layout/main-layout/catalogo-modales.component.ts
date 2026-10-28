@@ -10,7 +10,14 @@ import { CategoriasService } from "../../core/services/categorias.service";
 import { CatalogoModalesService } from "../../core/services/catalogo-modales.service";
 import { ProductosService } from "../../core/services/productos.service";
 import { SeccionesService } from "../../core/services/secciones.service";
+import { ListaCompraService } from "../../core/services/lista-compra.service";
 import { mensajeError } from "../../shared/utils/api-error";
+import { EMPTY, finalize, forkJoin, switchMap } from "rxjs";
+import type { Producto } from "../../core/models/producto.model";
+
+function normalizarNombreProducto(nombre: string): string {
+  return nombre.trim().replace(/\s+/g, " ").toLocaleLowerCase("es");
+}
 
 @Component({
   selector: "app-catalogo-modales",
@@ -29,12 +36,14 @@ export class CatalogoModalesComponent implements OnInit {
   private readonly productosService = inject(ProductosService);
   private readonly categoriasService = inject(CategoriasService);
   private readonly seccionesService = inject(SeccionesService);
+  private readonly listaService = inject(ListaCompraService);
   private readonly modalesService = inject(CatalogoModalesService);
 
   readonly categorias = this.categoriasService.categorias;
   readonly secciones = this.seccionesService.secciones;
   readonly modal = this.modalesService.modal;
   readonly error = signal("");
+  readonly guardandoProducto = signal(false);
   readonly seccionSeleccionada = signal("");
   readonly seccionParaSubseccion = signal("");
 
@@ -113,6 +122,10 @@ export class CatalogoModalesComponent implements OnInit {
 
   guardarProducto(): void {
     this.error.set("");
+    if (this.guardandoProducto()) {
+      return;
+    }
+
     const nombre = this.nombreProducto.trim();
     const precio = Number(this.precio);
 
@@ -139,24 +152,58 @@ export class CatalogoModalesComponent implements OnInit {
       ? { seccion, subseccion: this.subseccionSeleccionada }
       : {};
     const peticion = this.editandoId
-      ? this.productosService.actualizar(this.editandoId, { ...datosBase, ...datosSeccion })
-      : this.productosService.crear({
+      ? this.productosService.actualizar(this.editandoId, {
           ...datosBase,
-          seccion,
-          subseccion: this.subseccionSeleccionada,
-        });
+          ...datosSeccion,
+        })
+      : forkJoin({
+          items: this.listaService.cargar(true),
+          productos: this.productosService.cargar(true),
+        }).pipe(
+          switchMap(({ items, productos }) => {
+            const nombreNormalizado = normalizarNombreProducto(nombre);
+            const duplicadoEnLista = items.some(
+              (item) =>
+                normalizarNombreProducto(item.nombre) === nombreNormalizado,
+            );
+            const duplicadoEnCatalogo = productos.some(
+              (producto) =>
+                normalizarNombreProducto(producto.nombre) ===
+                nombreNormalizado,
+            );
+            if (duplicadoEnLista || duplicadoEnCatalogo) {
+              this.error.set(
+                duplicadoEnLista
+                  ? `«${nombre}» ya está en la lista. No se ha guardado el producto.`
+                  : `Ya existe un producto llamado «${nombre}» en el catálogo.`,
+              );
+              return EMPTY;
+            }
 
-    peticion.subscribe({
-      next: (producto) => {
-        const aviso = this.editandoId
-          ? `«${producto.nombre}» actualizado.`
-          : `«${producto.nombre}» añadido al catálogo.`;
-        this.cerrarModal();
-        this.modalesService.mostrarAviso(aviso);
-      },
-      error: (error: unknown) =>
-        this.error.set(mensajeError(error, "No se pudo guardar el producto.")),
-    });
+            return this.productosService.crear({
+              ...datosBase,
+              seccion,
+              subseccion: this.subseccionSeleccionada,
+            });
+          }),
+        );
+
+    this.guardandoProducto.set(true);
+    peticion
+      .pipe(finalize(() => this.guardandoProducto.set(false)))
+      .subscribe({
+        next: (producto: Producto) => {
+          const aviso = this.editandoId
+            ? `«${producto.nombre}» actualizado.`
+            : `«${producto.nombre}» añadido al catálogo.`;
+          this.cerrarModal();
+          this.modalesService.mostrarAviso(aviso);
+        },
+        error: (error: unknown) =>
+          this.error.set(
+            mensajeError(error, "No se pudo guardar el producto."),
+          ),
+      });
   }
 
   crearCategoria(): void {

@@ -41,7 +41,9 @@
         </div>
       </ng-template>
 
-      <div class="product-catalog-filters flex flex-column md:flex-row md:flex-wrap gap-2 mb-3">
+      <div
+        class="product-catalog-filters flex flex-column md:flex-row md:flex-wrap gap-2 mb-3"
+      >
         <div class="search-box product-catalog-search">
           <span>⌕</span>
           <input
@@ -102,16 +104,20 @@
         </div>
       </div>
       } @else if (productosFiltrados().length) {
-      <div class="flex justify-content-end gap-2 mb-3" role="group" aria-label="Vista del catálogo">
+      <div
+        class="flex justify-content-end gap-2 mb-3"
+        role="group"
+        aria-label="Vista del catálogo"
+      >
         <p-button
-          label="Tarjetas"
+          label=""
           icon="pi pi-th-large"
           [outlined]="vista() !== 'cards'"
           [attr.aria-pressed]="vista() === 'cards'"
           (onClick)="vista.set('cards')"
         />
         <p-button
-          label="Listado"
+          label=""
           icon="pi pi-list"
           [outlined]="vista() !== 'listado'"
           [attr.aria-pressed]="vista() === 'listado'"
@@ -122,9 +128,7 @@
       @if (vista() === 'cards') {
       <div class="product-grid">
         @for (producto of productosFiltrados(); track producto._id) {
-        <div
-          [class.product-added-card]="productoEnLista(producto)"
-        >
+        <div [class.product-added-card]="productoEnLista(producto)">
           <p-card styleClass="h-full">
             <ng-template pTemplate="header">
               <div class="flex align-items-center justify-content-between p-2">
@@ -167,21 +171,10 @@
                 </div>
                 <p-button
                   [icon]="productoEnLista(producto) ? 'pi pi-check' : 'pi pi-plus'"
-                  [label]="productoEnLista(producto) ? 'Añadido' : undefined"
                   [rounded]="true"
-                  (onClick)="anadirALista(producto)"
+                  (onClick)="productoEnLista(producto) ? quitarDeLista(producto): anadirALista(producto)"
                   [ariaLabel]="productoEnLista(producto) ? 'Avisar que ya está añadido' : 'Añadir a la lista'"
                 />
-                @if (productoEnLista(producto)) {
-                <p-button
-                  icon="pi pi-minus"
-                  [text]="true"
-                  [rounded]="true"
-                  severity="danger"
-                  (onClick)="quitarDeLista(producto)"
-                  aria-label="Quitar de la lista"
-                />
-                }
               </div>
             </div>
           </p-card>
@@ -195,7 +188,9 @@
           class="product-list-item flex align-items-center gap-3 p-3 border-1 border-round"
           [class.product-list-item-added]="productoEnLista(producto)"
         >
-          <span class="text-2xl product-list-icon">{{ iconoCategoria(producto) }}</span>
+          <span class="text-2xl product-list-icon"
+            >{{ iconoCategoria(producto) }}</span
+          >
           <div class="flex-1 min-w-0">
             <div class="flex align-items-center flex-wrap gap-2">
               <span class="font-semibold">{{ producto.nombre }}</span>
@@ -203,9 +198,12 @@
               <span class="product-added-label">En la lista</span>
               }
             </div>
-            <div class="text-sm text-primary mt-1">{{ nombreCategoria(producto) }}</div>
+            <div class="text-sm text-primary mt-1">
+              {{ nombreCategoria(producto) }}
+            </div>
             <div class="text-sm text-color-secondary">
-              {{ nombreSeccion(producto) }}@if (producto.subseccion) { · {{ producto.subseccion }}}
+              {{ nombreSeccion(producto) }}@if (producto.subseccion) { · {{
+              producto.subseccion }}}
             </div>
           </div>
           <div class="text-lg font-bold white-space-nowrap">
@@ -214,21 +212,11 @@
           <div class="flex align-items-center gap-1">
             <p-button
               [icon]="productoEnLista(producto) ? 'pi pi-check' : 'pi pi-plus'"
-              [label]="productoEnLista(producto) ? 'Añadido' : undefined"
               [rounded]="true"
-              (onClick)="anadirALista(producto)"
+              (onClick)="productoEnLista(producto) ? quitarDeLista(producto): anadirALista(producto)"
               [ariaLabel]="productoEnLista(producto) ? 'Avisar que ya está añadido' : 'Añadir a la lista'"
             />
-            @if (productoEnLista(producto)) {
-            <p-button
-              icon="pi pi-minus"
-              [text]="true"
-              [rounded]="true"
-              severity="danger"
-              (onClick)="quitarDeLista(producto)"
-              aria-label="Quitar de la lista"
-            />
-            }
+
             <p-button
               icon="pi pi-pencil"
               [text]="true"
@@ -248,8 +236,7 @@
         </div>
         }
       </div>
-      }
-      } @else {
+      } } @else {
       <div
         class="flex flex-column align-items-center justify-content-center py-8 gap-3 text-center"
       >

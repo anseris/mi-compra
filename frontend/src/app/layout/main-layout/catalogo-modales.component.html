@@ -105,6 +105,7 @@
       [label]="editandoId ? 'Guardar cambios' : 'Guardar producto'"
       icon="pi pi-check"
       type="submit"
+      [disabled]="guardandoProducto()"
       styleClass="w-full"
     />
   </form>

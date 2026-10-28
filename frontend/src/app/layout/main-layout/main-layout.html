@@ -69,7 +69,9 @@
     } @if (aviso()) {
     <div class="layout-notice" role="status">{{ aviso() }}</div>
     } @defer (when modal()) {
+    @if (modal()) {
     <app-catalogo-modales />
+    }
     }
 
     <footer class="app-footer">
