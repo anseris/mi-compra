@@ -14,17 +14,17 @@ declare global {
 }
 
 function esEntornoLocal(): boolean {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return false;
   }
 
   const hostname = window.location.hostname;
 
   return (
-    hostname === 'localhost' ||
-    hostname === '127.0.0.1' ||
-    hostname === '::1' ||
-    hostname === '[::1]'
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "::1" ||
+    hostname === "[::1]"
   );
 }
 
@@ -36,9 +36,9 @@ function obtenerApiProduccion(): string {
   }
 
   const origen = /^https?:\/\//i.test(apiHost) ? apiHost : `https://${apiHost}`;
-  return `${origen.replace(/\/+$/, '')}/api`;
+  return `${origen.replace(/\/+$/, "")}/api`;
 }
 
 export const API_BASE = esEntornoLocal()
-  ? 'http://localhost:3000/api'
-  : obtenerApiProduccion();
+  ? "http://localhost:3000/api"
+  : "https://mi-compra.onrender.com/api";

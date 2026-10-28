@@ -13,7 +13,9 @@ const origenesConfigurados = (process.env["CORS_ORIGINS"] ?? "")
   .filter(Boolean);
 
 function normalizarOrigen(origen: string): string {
-  const url = new URL(/^[a-z][a-z\d+.-]*:\/\//i.test(origen) ? origen : `https://${origen}`);
+  const url = new URL(
+    /^[a-z][a-z\d+.-]*:\/\//i.test(origen) ? origen : `https://${origen}`,
+  );
 
   if (url.protocol !== "http:" && url.protocol !== "https:") {
     throw new Error(`Origen CORS no válido: ${origen}`);
@@ -25,7 +27,11 @@ function normalizarOrigen(origen: string): string {
 const origenesPermitidos = (
   origenesConfigurados.length > 0
     ? origenesConfigurados
-    : ["http://localhost:4200", "http://127.0.0.1:4200"]
+    : [
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+        "https://mi-compra.anseris51-2f5.workers.dev",
+      ]
 ).map(normalizarOrigen);
 
 app.use(
