@@ -10,8 +10,8 @@ function cantidadValida(value: unknown): number | null {
   return Number.isFinite(cantidad) && cantidad >= 1 ? cantidad : null;
 }
 
-function escaparExpresionRegular(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function normalizarNombre(value: string): string {
+  return value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('es');
 }
 
 // GET /api/lista — listar la lista de la compra
@@ -63,14 +63,13 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const palabrasNombre = producto.nombre.trim().replace(/\s+/g, ' ').split(' ');
-    const nombreCoincidente = palabrasNombre
-      .map(escaparExpresionRegular)
-      .join('\\s+');
-    const existente = await ItemLista.findOne({
-      listaId: lista._id,
-      nombre: { $regex: `^\\s*${nombreCoincidente}\\s*$`, $options: 'i' },
-    });
+    const itemsExistentes = await ItemLista.find({ listaId: lista._id })
+      .select('nombre')
+      .lean();
+    const nombreProducto = normalizarNombre(producto.nombre);
+    const existente = itemsExistentes.some(
+      (item) => normalizarNombre(item.nombre) === nombreProducto,
+    );
 
     if (existente) {
       res.status(409).json({
