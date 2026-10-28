@@ -5,10 +5,13 @@ export interface ItemLista {
   /** Producto del catálogo del que se copió el artículo. */
   productoId: string | null;
   categoriaId: string | null;
+  seccionId?: string | null;
   nombre: string;
   precio: number;
   categoriaNombre: string;
   categoriaIcono: string;
+  seccionNombre?: string;
+  subseccion?: string;
   cantidad: number;
   comprado: boolean;
   createdAt?: string;

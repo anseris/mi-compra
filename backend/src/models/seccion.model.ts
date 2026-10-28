@@ -9,6 +9,10 @@ export interface ISeccion {
   updatedAt?: Date;
 }
 
+export function normalizarNombreSeccion(nombre: string): string {
+  return nombre.trim().toLocaleLowerCase('es');
+}
+
 const seccionSchema = new Schema<ISeccion>(
   {
     nombre: {

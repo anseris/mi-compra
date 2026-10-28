@@ -216,6 +216,16 @@
   width: 180px;
 }
 
+.product-catalog-search {
+  flex: 2 1 24rem;
+  min-width: 16rem;
+}
+
+.product-catalog-filter {
+  flex: 1 1 12rem;
+  min-width: 10rem;
+}
+
 .product-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -382,6 +392,12 @@
   .filters select {
     flex: 0 0 100%;
     width: 100%;
+  }
+
+  .product-catalog-search,
+  .product-catalog-filter {
+    flex-basis: 100%;
+    min-width: 0;
   }
 
   .catalog-footer {

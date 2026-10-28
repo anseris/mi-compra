@@ -170,6 +170,9 @@ export class ProductosPage implements OnInit {
   readonly seccionSeleccionada = signal("");
   subseccionSeleccionada = "";
   editandoId: string | null = null;
+  nombreNuevaSeccion = "";
+  readonly seccionParaSubseccion = signal("");
+  nombreNuevaSubseccion = "";
 
   // Campo del formulario de categoría.
   nombreNuevaCategoria = "";
@@ -213,6 +216,58 @@ export class ProductosPage implements OnInit {
     ) {
       this.subseccionSeleccionada = "";
     }
+  }
+
+  crearSeccion(): void {
+    const nombre = this.nombreNuevaSeccion.trim();
+
+    if (!nombre) {
+      this.error.set("Escribe el nombre de la sección.");
+      return;
+    }
+
+    this.error.set("");
+    this.seccionesService.crear(nombre).subscribe({
+      next: (seccion) => {
+        this.nombreNuevaSeccion = "";
+        this.seccionParaSubseccion.set(seccion._id);
+        this.mostrarAviso(`Sección «${seccion.nombre}» creada.`);
+      },
+      error: (error: unknown) => {
+        this.error.set(mensajeError(error, "No se pudo crear la sección."));
+      },
+    });
+  }
+
+  crearSubseccion(): void {
+    const seccionId = this.seccionParaSubseccion();
+    const nombre = this.nombreNuevaSubseccion.trim();
+
+    if (!seccionId) {
+      this.error.set("Selecciona la sección de la nueva subsección.");
+      return;
+    }
+
+    if (!nombre) {
+      this.error.set("Escribe el nombre de la subsección.");
+      return;
+    }
+
+    this.error.set("");
+    this.seccionesService.crearSubseccion(seccionId, nombre).subscribe({
+      next: (seccion) => {
+        this.nombreNuevaSubseccion = "";
+        if (this.seccionSeleccionada() === seccion._id) {
+          this.subseccionSeleccionada = nombre;
+        }
+        this.mostrarAviso(`Subsección «${nombre}» añadida a «${seccion.nombre}».`);
+      },
+      error: (error: unknown) => {
+        this.error.set(
+          mensajeError(error, "No se pudo crear la subsección."),
+        );
+      },
+    });
   }
 
   cambiarFiltroSeccion(seccionId: string): void {

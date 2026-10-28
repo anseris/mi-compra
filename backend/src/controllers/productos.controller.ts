@@ -226,6 +226,15 @@ export const updateProducto = async (req: Request, res: Response): Promise<void>
         actualizacion['categoriaId'] = producto.categoria;
       }
 
+      if (cambios['seccion'] !== undefined || cambios['subseccion'] !== undefined) {
+        const seccion = producto.seccion
+          ? await Seccion.findById(producto.seccion).select('nombre')
+          : null;
+        actualizacion['seccionId'] = producto.seccion ?? null;
+        actualizacion['seccionNombre'] = seccion?.nombre ?? '';
+        actualizacion['subseccion'] = producto.subseccion ?? '';
+      }
+
       if (Object.keys(actualizacion).length > 0) {
         await ItemLista.updateMany(
           { productoId: producto._id },

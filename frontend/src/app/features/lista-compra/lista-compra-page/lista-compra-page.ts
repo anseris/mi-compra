@@ -7,8 +7,10 @@ import { ButtonModule } from "primeng/button";
 import { SelectModule } from "primeng/select";
 import type { Categoria } from "../../../core/models/categoria.model";
 import type { ItemLista } from "../../../core/models/item-lista.model";
+import type { Seccion } from "../../../core/models/seccion.model";
 import { CategoriasService } from "../../../core/services/categorias.service";
 import { ListaCompraService } from "../../../core/services/lista-compra.service";
+import { SeccionesService } from "../../../core/services/secciones.service";
 import { mensajeError } from "../../../shared/utils/api-error";
 import { CardModule } from "primeng/card";
 import { InputTextModule } from "primeng/inputtext";
@@ -39,9 +41,11 @@ import { DividerModule } from "primeng/divider";
 export class ListaCompraPage implements OnInit {
   private readonly listaService = inject(ListaCompraService);
   private readonly categoriasService = inject(CategoriasService);
+  private readonly seccionesService = inject(SeccionesService);
 
   readonly items = this.listaService.items;
   readonly categorias = this.categoriasService.categorias;
+  readonly secciones = this.seccionesService.secciones;
   readonly listas = this.listaService.listas;
   readonly listaSeleccionada = this.listaService.listaSeleccionada;
   readonly listaSeleccionadaId = this.listaService.listaSeleccionadaId;
@@ -50,6 +54,8 @@ export class ListaCompraPage implements OnInit {
   readonly error = signal("");
   readonly aviso = signal("");
   readonly filtroCategoria = signal("todas");
+  readonly filtroSeccion = signal("todas");
+  readonly filtroSubseccion = signal("todas");
   nombreNuevaLista = "";
 
   readonly opcionesLista = computed(() =>
@@ -65,9 +71,38 @@ export class ListaCompraPage implements OnInit {
     { nombre: "Sin categoría", valor: "sin-categoria" },
   ]);
 
+  readonly opcionesFiltroSeccion = computed(() => [
+    { nombre: "Todas las secciones", valor: "todas" },
+    ...this.secciones().map((seccion: Seccion) => ({
+      nombre: seccion.nombre,
+      valor: seccion._id,
+    })),
+    { nombre: "Sin sección", valor: "sin-seccion" },
+  ]);
+
+  readonly opcionesFiltroSubseccion = computed(() => {
+    const idSeccion = this.filtroSeccion();
+
+    if (idSeccion === "todas" || idSeccion === "sin-seccion") {
+      return [{ nombre: "Todas las subsecciones", valor: "todas" }];
+    }
+
+    const seccion = this.secciones().find((item) => item._id === idSeccion);
+    return [
+      { nombre: "Todas las subsecciones", valor: "todas" },
+      { nombre: "Sin subsección", valor: "sin-subseccion" },
+      ...(seccion?.subsecciones ?? []).map((subseccion) => ({
+        nombre: subseccion,
+        valor: subseccion,
+      })),
+    ];
+  });
+
   readonly itemsFiltrados = computed(() => {
     const consulta = this.busqueda().trim().toLocaleLowerCase("es");
     const filtroCategoria = this.filtroCategoria();
+    const filtroSeccion = this.filtroSeccion();
+    const filtroSubseccion = this.filtroSubseccion();
 
     return this.items().filter(
       (item) =>
@@ -75,14 +110,28 @@ export class ListaCompraPage implements OnInit {
           (filtroCategoria === "sin-categoria"
             ? !item.categoriaId
             : item.categoriaId === filtroCategoria)) &&
+        (filtroSeccion === "todas" ||
+          (filtroSeccion === "sin-seccion"
+            ? !item.seccionId
+            : item.seccionId === filtroSeccion)) &&
+        (filtroSubseccion === "todas" ||
+          (filtroSubseccion === "sin-subseccion"
+            ? !item.subseccion
+            : item.subseccion === filtroSubseccion)) &&
         (!consulta ||
           item.nombre.toLocaleLowerCase("es").includes(consulta) ||
-          item.categoriaNombre.toLocaleLowerCase("es").includes(consulta)),
+          item.categoriaNombre.toLocaleLowerCase("es").includes(consulta) ||
+          (item.seccionNombre ?? "").toLocaleLowerCase("es").includes(consulta) ||
+          (item.subseccion ?? "").toLocaleLowerCase("es").includes(consulta)),
     );
   });
 
   readonly hayFiltrosActivos = computed(
-    () => Boolean(this.busqueda().trim()) || this.filtroCategoria() !== "todas",
+    () =>
+      Boolean(this.busqueda().trim()) ||
+      this.filtroCategoria() !== "todas" ||
+      this.filtroSeccion() !== "todas" ||
+      this.filtroSubseccion() !== "todas",
   );
 
   readonly total = computed(() =>
@@ -111,6 +160,12 @@ export class ListaCompraPage implements OnInit {
     this.categoriasService.cargar().subscribe({
       error: (error: unknown) => {
         this.error.set(mensajeError(error, "No se pudieron cargar las categorías."));
+      },
+    });
+
+    this.seccionesService.cargar().subscribe({
+      error: (error: unknown) => {
+        this.error.set(mensajeError(error, "No se pudieron cargar las secciones."));
       },
     });
 
@@ -155,12 +210,19 @@ export class ListaCompraPage implements OnInit {
     this.error.set("");
     this.busqueda.set("");
     this.filtroCategoria.set("todas");
+    this.filtroSeccion.set("todas");
+    this.filtroSubseccion.set("todas");
 
     this.listaService.seleccionarLista(id).subscribe({
       error: (error: unknown) => {
         this.error.set(mensajeError(error, "No se pudo cargar la lista seleccionada."));
       },
     });
+  }
+
+  cambiarFiltroSeccion(id: string): void {
+    this.filtroSeccion.set(id);
+    this.filtroSubseccion.set("todas");
   }
 
   crearLista(): void {
@@ -186,6 +248,8 @@ export class ListaCompraPage implements OnInit {
         this.nombreNuevaLista = "";
         this.busqueda.set("");
         this.filtroCategoria.set("todas");
+        this.filtroSeccion.set("todas");
+        this.filtroSubseccion.set("todas");
         this.aviso.set(`Lista «${lista.nombre}» creada.`);
       },
       error: (error: unknown) => {

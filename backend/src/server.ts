@@ -5,6 +5,7 @@ import {
   crearCategoriasPorDefecto,
   crearSeccionesPorDefecto,
 } from './services/datos-iniciales.service.js';
+import { sincronizarSeccionesDeArticulosExistentes } from './services/sincronizar-secciones-lista.service.js';
 
 const port = Number(process.env['PORT'] ?? 3000);
 
@@ -30,6 +31,7 @@ async function startServer(): Promise<void> {
   // La aplicación no tiene cuentas: las categorías iniciales se crean una sola vez.
   await crearCategoriasPorDefecto();
   await crearSeccionesPorDefecto();
+  await sincronizarSeccionesDeArticulosExistentes();
 
   app.listen(port, '0.0.0.0', () => {
     console.log(`Servidor de Mi compra iniciado en http://localhost:${port}`);

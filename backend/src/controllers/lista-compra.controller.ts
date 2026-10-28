@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { Categoria } from '../models/categoria.model.js';
 import { ItemLista } from '../models/item-lista.model.js';
 import { Producto } from '../models/producto.model.js';
+import { Seccion } from '../models/seccion.model.js';
 import { obtenerListaCompra } from '../services/listas-compra.service.js';
 
 function cantidadValida(value: unknown): number | null {
@@ -73,6 +74,9 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
     }
 
     const categoria = await Categoria.findById(producto.categoria).select('nombre icono');
+    const seccion = producto.seccion
+      ? await Seccion.findById(producto.seccion).select('nombre')
+      : null;
 
     const item = await ItemLista.create({
       listaId: lista._id,
@@ -82,6 +86,9 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
       precio: producto.precio,
       categoriaNombre: categoria?.nombre ?? '',
       categoriaIcono: categoria?.icono ?? '🛍️',
+      seccionId: producto.seccion ?? null,
+      seccionNombre: seccion?.nombre ?? '',
+      subseccion: producto.subseccion ?? '',
       cantidad,
       comprado: false,
     });

@@ -43,4 +43,36 @@ export class SeccionesService {
 
     return this.peticion$;
   }
+
+  crear(nombre: string): Observable<Seccion> {
+    return this.http.post<Seccion>(this.apiUrl, { nombre }).pipe(
+      tap((seccion) => {
+        this.seccionesSignal.update((secciones) =>
+          [...secciones, seccion].sort((a, b) => a.orden - b.orden || a.nombre.localeCompare(b.nombre, 'es')),
+        );
+      }),
+    );
+  }
+
+  crearSubseccion(seccionId: string, nombre: string): Observable<Seccion> {
+    return this.http
+      .post<Seccion>(`${this.apiUrl}/${seccionId}/subsecciones`, { nombre })
+      .pipe(
+        tap((actualizada) => {
+          this.seccionesSignal.update((secciones) =>
+            secciones.map((seccion) =>
+              seccion._id === actualizada._id ? actualizada : seccion,
+            ),
+          );
+        }),
+      );
+  }
+
+  actualizar(seccion: Seccion): void {
+    this.seccionesSignal.update((secciones) =>
+      secciones.map((actual) =>
+        actual._id === seccion._id ? seccion : actual,
+      ),
+    );
+  }
 }

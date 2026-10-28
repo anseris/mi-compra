@@ -160,6 +160,64 @@
 
       <p-divider></p-divider>
 
+      <div class="flex flex-column gap-2">
+        <div class="text-lg font-semibold">Gestionar secciones</div>
+        <form (ngSubmit)="crearSeccion()" class="flex gap-2">
+          <input
+            pInputText
+            name="nombreNuevaSeccion"
+            [(ngModel)]="nombreNuevaSeccion"
+            placeholder="Nueva sección"
+            aria-label="Nombre de la nueva sección"
+            maxlength="40"
+            required
+            class="flex-1"
+          />
+          <p-button
+            icon="pi pi-plus"
+            type="submit"
+            [rounded]="true"
+            ariaLabel="Crear sección"
+          />
+        </form>
+
+        <div class="text-sm text-color-secondary mt-2">
+          Añadir subsección
+        </div>
+        <p-select
+          class="p-0 w-full"
+          inputId="seccionParaSubseccion"
+          name="seccionParaSubseccion"
+          [options]="secciones()"
+          [ngModel]="seccionParaSubseccion()"
+          (ngModelChange)="seccionParaSubseccion.set($event)"
+          optionLabel="nombre"
+          optionValue="_id"
+          placeholder="Selecciona una sección"
+        />
+        <form (ngSubmit)="crearSubseccion()" class="flex gap-2">
+          <input
+            pInputText
+            name="nombreNuevaSubseccion"
+            [(ngModel)]="nombreNuevaSubseccion"
+            placeholder="Nueva subsección"
+            aria-label="Nombre de la nueva subsección"
+            maxlength="40"
+            required
+            class="flex-1"
+          />
+          <p-button
+            icon="pi pi-plus"
+            type="submit"
+            [rounded]="true"
+            [disabled]="!secciones().length"
+            ariaLabel="Crear subsección"
+          />
+        </form>
+      </div>
+
+      <p-divider></p-divider>
+
       <div class="flex gap-2 p-3 surface-50 border-round">
         <i class="pi pi-star-fill text-primary"></i>
         <div class="text-sm">
@@ -195,8 +253,8 @@
         </div>
       </ng-template>
 
-      <div class="flex flex-column md:flex-row md:flex-wrap gap-2 mb-3">
-        <div class="search-box flex-1">
+      <div class="product-catalog-filters flex flex-column md:flex-row md:flex-wrap gap-2 mb-3">
+        <div class="search-box product-catalog-search">
           <span>⌕</span>
           <input
             aria-label="Buscar productos"
@@ -207,7 +265,7 @@
         </div>
 
         <p-select
-          class="p-0 w-full md:w-14rem"
+          class="p-0 product-catalog-filter"
           inputId="filtroProductoCategoria"
           name="filtroProductoCategoria"
           [options]="opcionesFiltroCategoria()"
@@ -219,7 +277,7 @@
           ariaLabel="Filtrar por categoría"
         />
         <p-select
-          class="p-0 w-full md:w-14rem"
+          class="p-0 product-catalog-filter"
           inputId="filtroProductoSeccion"
           name="filtroProductoSeccion"
           [options]="opcionesFiltroSeccion()"
@@ -231,7 +289,7 @@
           ariaLabel="Filtrar por sección"
         />
         <p-select
-          class="p-0 w-full md:w-14rem"
+          class="p-0 product-catalog-filter"
           inputId="filtroProductoSubseccion"
           name="filtroProductoSubseccion"
           [options]="opcionesFiltroSubseccion()"
@@ -261,15 +319,25 @@
         <div class="col-12 md:col-6 xl:col-4">
           <p-card styleClass="h-full">
             <ng-template pTemplate="header">
-              <div class="flex align-items-center justify-content-between p-3">
+              <div class="flex align-items-center justify-content-between p-2">
                 <span class="text-2xl">{{ iconoCategoria(producto) }}</span>
-                <p-button
-                  icon="pi pi-pencil"
-                  [text]="true"
-                  [rounded]="true"
-                  (onClick)="editarProducto(producto)"
-                  aria-label="Editar producto"
-                />
+                <div class="flex align-items-center gap-1">
+                  <p-button
+                    icon="pi pi-pencil"
+                    [text]="true"
+                    [rounded]="true"
+                    (onClick)="editarProducto(producto)"
+                    aria-label="Editar producto"
+                  />
+                  <p-button
+                    icon="pi pi-trash"
+                    [text]="true"
+                    [rounded]="true"
+                    severity="danger"
+                    (onClick)="eliminarProducto(producto)"
+                    aria-label="Eliminar producto"
+                  />
+                </div>
               </div>
             </ng-template>
             <div class="flex flex-column gap-2">
@@ -277,7 +345,8 @@
                 {{ nombreCategoria(producto) }}
               </div>
               <div class="text-sm text-color-secondary">
-                {{ nombreSeccion(producto) }}@if (producto.subseccion) { · {{ producto.subseccion }}}
+                {{ nombreSeccion(producto) }}@if (producto.subseccion) { · {{
+                producto.subseccion }}}
               </div>
               <div class="text-lg font-semibold">{{ producto.nombre }}</div>
               <div class="flex align-items-center justify-content-between mt-2">
@@ -292,14 +361,6 @@
                   aria-label="Añadir a la lista"
                 />
               </div>
-              <p-button
-                label="Eliminar"
-                icon="pi pi-trash"
-                [text]="true"
-                severity="danger"
-                (onClick)="eliminarProducto(producto)"
-                styleClass="p-0"
-              />
             </div>
           </p-card>
         </div>
@@ -316,12 +377,13 @@
           <i class="pi pi-inbox text-3xl text-primary"></i>
         </div>
         <div class="text-xl font-bold">
-          {{ hayFiltrosActivos() ? 'No hay resultados' :
-          'Tu catálogo empieza aquí' }}
+          {{ hayFiltrosActivos() ? 'No hay resultados' : 'Tu catálogo empieza
+          aquí' }}
         </div>
         <div class="text-color-secondary max-w-30rem">
-          {{ hayFiltrosActivos() ? 'Prueba con otra búsqueda o combinación de filtros.' : 'Añade tus productos habituales con su precio
-          y categoría. Después podrás incorporarlos a tu lista de la compra.' }}
+          {{ hayFiltrosActivos() ? 'Prueba con otra búsqueda o combinación de
+          filtros.' : 'Añade tus productos habituales con su precios y
+          categoría. Después podrás incorporarlos a tu lista de la compra.' }}
         </div>
         @if (!hayFiltrosActivos()) {
         <p-button

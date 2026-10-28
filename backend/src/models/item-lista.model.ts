@@ -7,11 +7,14 @@ export interface IItemLista {
   productoId: Types.ObjectId | null;
   /** Categoría del producto (null si es manual). */
   categoriaId: Types.ObjectId | null;
+  seccionId: Types.ObjectId | null;
   /** Datos copiados del producto en el momento de añadirlo a la lista. */
   nombre: string;
   precio: number;
   categoriaNombre: string;
   categoriaIcono: string;
+  seccionNombre: string;
+  subseccion: string;
   cantidad: number;
   comprado: boolean;
   createdAt?: Date;
@@ -35,6 +38,11 @@ const itemListaSchema = new Schema<IItemLista>(
       ref: 'Categoria',
       default: null,
     },
+    seccionId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Seccion',
+      default: null,
+    },
     nombre: {
       type: String,
       required: true,
@@ -55,6 +63,16 @@ const itemListaSchema = new Schema<IItemLista>(
       type: String,
       trim: true,
       default: '🛍️',
+    },
+    seccionNombre: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    subseccion: {
+      type: String,
+      trim: true,
+      default: '',
     },
     cantidad: {
       type: Number,
@@ -77,5 +95,6 @@ const itemListaSchema = new Schema<IItemLista>(
 itemListaSchema.index({ comprado: 1 });
 itemListaSchema.index({ productoId: 1 });
 itemListaSchema.index({ listaId: 1, comprado: 1 });
+itemListaSchema.index({ seccionId: 1, subseccion: 1 });
 
 export const ItemLista = model<IItemLista>('ItemLista', itemListaSchema);
