@@ -157,23 +157,6 @@ button {
   color: #7c8d83;
 }
 
-.p-message {
-  border-radius: 10px;
-  font-size: 12px;
-}
-
-.p-message.p-message-error {
-  background: #fdf2f3;
-  border: 1px solid #f6cccf;
-  color: #b0414e;
-}
-
-.p-message.p-message-success {
-  background: #f0faf4;
-  border: 1px solid #cce7d8;
-  color: #176b52;
-}
-
 .p-divider.p-divider-horizontal {
   margin: 1rem 0;
 }

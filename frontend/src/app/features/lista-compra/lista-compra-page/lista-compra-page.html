@@ -1,9 +1,3 @@
-@if (error()) {
-  <p-message severity="error" styleClass="w-full mb-3" [closable]="true" (onClose)="error.set('')">
-    <span>{{ error() }}</span>
-  </p-message>
-}
-
 <div class="grid">
   <div class="col-12 lg:col-8">
     <p-card>
@@ -17,12 +11,6 @@
           <i class="pi pi-shopping-cart text-4xl text-primary"></i>
         </div>
       </ng-template>
-
-      @if (aviso()) {
-        <p-message severity="success" styleClass="w-full mb-3" [closable]="true" (onClose)="aviso.set('')">
-          <span>{{ aviso() }}</span>
-        </p-message>
-      }
 
       <div class="flex flex-column md:flex-row gap-2 mb-3 align-items-center">
         <div class="search-box flex-1">

@@ -16,8 +16,8 @@ import { CardModule } from "primeng/card";
 import { InputTextModule } from "primeng/inputtext";
 import { IconFieldModule } from "primeng/iconfield";
 import { InputIconModule } from "primeng/inputicon";
-import { MessageModule } from "primeng/message";
 import { DividerModule } from "primeng/divider";
+import { NotificacionesService } from "../../../shared/services/notificaciones.service";
 
 @Component({
   selector: "app-lista-compra-page",
@@ -31,7 +31,6 @@ import { DividerModule } from "primeng/divider";
     InputTextModule,
     IconFieldModule,
     InputIconModule,
-    MessageModule,
     DividerModule,
     CheckboxModule,
   ],
@@ -42,6 +41,7 @@ export class ListaCompraPage implements OnInit {
   private readonly listaService = inject(ListaCompraService);
   private readonly categoriasService = inject(CategoriasService);
   private readonly seccionesService = inject(SeccionesService);
+  private readonly notificaciones = inject(NotificacionesService);
 
   readonly items = this.listaService.items;
   readonly categorias = this.categoriasService.categorias;
@@ -49,8 +49,6 @@ export class ListaCompraPage implements OnInit {
   readonly listaSeleccionada = this.listaService.listaSeleccionada;
   readonly cargando = this.listaService.cargando;
   readonly busqueda = signal("");
-  readonly error = signal("");
-  readonly aviso = signal("");
   readonly filtroCategoria = signal("todas");
   readonly filtroSeccion = signal("todas");
   readonly filtroSubseccion = signal("todas");
@@ -152,19 +150,19 @@ export class ListaCompraPage implements OnInit {
   ngOnInit(): void {
     this.categoriasService.cargar().subscribe({
       error: (error: unknown) => {
-        this.error.set(mensajeError(error, "No se pudieron cargar las categorías."));
+        this.notificaciones.error(mensajeError(error, "No se pudieron cargar las categorías."));
       },
     });
 
     this.seccionesService.cargar().subscribe({
       error: (error: unknown) => {
-        this.error.set(mensajeError(error, "No se pudieron cargar las secciones."));
+        this.notificaciones.error(mensajeError(error, "No se pudieron cargar las secciones."));
       },
     });
 
     this.listaService.cargar().subscribe({
       error: (error: unknown) => {
-        this.error.set(
+        this.notificaciones.error(
           mensajeError(error, "No se pudo cargar la lista de la compra."),
         );
       },
@@ -177,13 +175,11 @@ export class ListaCompraPage implements OnInit {
   }
 
   alternar(item: ItemLista): void {
-    this.error.set("");
-
     this.listaService
       .actualizar(item._id, { comprado: !item.comprado })
       .subscribe({
         error: (error: unknown) => {
-          this.error.set(
+          this.notificaciones.error(
             mensajeError(error, "No se pudo actualizar el artículo."),
           );
         },
@@ -198,21 +194,17 @@ export class ListaCompraPage implements OnInit {
       return;
     }
 
-    this.error.set("");
-
     this.listaService.actualizar(item._id, { cantidad }).subscribe({
       error: (error: unknown) => {
-        this.error.set(mensajeError(error, "No se pudo cambiar la cantidad."));
+        this.notificaciones.error(mensajeError(error, "No se pudo cambiar la cantidad."));
       },
     });
   }
 
   eliminar(item: ItemLista): void {
-    this.error.set("");
-
     this.listaService.eliminar(item._id).subscribe({
       error: (error: unknown) => {
-        this.error.set(
+        this.notificaciones.error(
           mensajeError(error, "No se pudo quitar el artículo de la lista."),
         );
       },
@@ -228,11 +220,9 @@ export class ListaCompraPage implements OnInit {
       return;
     }
 
-    this.error.set("");
-
     this.listaService.vaciarComprados().subscribe({
       error: (error: unknown) => {
-        this.error.set(
+        this.notificaciones.error(
           mensajeError(error, "No se pudieron quitar los artículos comprados."),
         );
       },

@@ -7,11 +7,6 @@
   [draggable]="false"
   [resizable]="false"
 >
-  @if (error()) {
-    <p-message severity="error" styleClass="w-full mb-3">
-      <span>{{ error() }}</span>
-    </p-message>
-  }
   <form (ngSubmit)="guardarProducto()" class="flex flex-column gap-3">
     <!-- Primera línea: Nombre del producto -->
     <div class="flex flex-column gap-2">
@@ -120,11 +115,6 @@
   [draggable]="false"
   [resizable]="false"
 >
-  @if (error()) {
-    <p-message severity="error" styleClass="w-full mb-3">
-      <span>{{ error() }}</span>
-    </p-message>
-  }
   <form (ngSubmit)="crearCategoria()" class="flex flex-column gap-3">
     <label for="modalNuevaCategoria">Nombre de la categoría</label>
     <input
@@ -149,11 +139,6 @@
   [draggable]="false"
   [resizable]="false"
 >
-  @if (error()) {
-    <p-message severity="error" styleClass="w-full mb-3">
-      <span>{{ error() }}</span>
-    </p-message>
-  }
   <div class="flex flex-column gap-3">
     <form (ngSubmit)="crearSeccion()" class="flex flex-column gap-2">
       <label for="modalNuevaSeccion">Crear sección</label>
@@ -215,11 +200,6 @@
   [draggable]="false"
   [resizable]="false"
 >
-  @if (error()) {
-    <p-message severity="error" styleClass="w-full mb-3">
-      <span>{{ error() }}</span>
-    </p-message>
-  }
   <form (ngSubmit)="crearLista()" class="flex flex-column gap-3">
     <label for="modalNuevaLista">Nombre de la lista</label>
     <input

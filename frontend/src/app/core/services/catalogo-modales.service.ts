@@ -1,4 +1,5 @@
-import { Injectable, signal } from "@angular/core";
+import { Injectable, inject, signal } from "@angular/core";
+import { NotificacionesService } from "../../shared/services/notificaciones.service";
 import type { Producto } from "../models/producto.model";
 
 export type ModalCatalogo =
@@ -12,28 +13,24 @@ export type ModalCatalogo =
   providedIn: "root",
 })
 export class CatalogoModalesService {
+  private readonly notificaciones = inject(NotificacionesService);
   private readonly modalSignal = signal<ModalCatalogo>(null);
 
   readonly modal = this.modalSignal.asReadonly();
-  readonly aviso = signal("");
 
   abrirProducto(producto: Producto | null = null): void {
-    this.limpiarAviso();
     this.modalSignal.set({ tipo: "producto", producto });
   }
 
   abrirCategoria(): void {
-    this.limpiarAviso();
     this.modalSignal.set({ tipo: "categoria" });
   }
 
   abrirSecciones(): void {
-    this.limpiarAviso();
     this.modalSignal.set({ tipo: "secciones" });
   }
 
   abrirLista(): void {
-    this.limpiarAviso();
     this.modalSignal.set({ tipo: "lista" });
   }
 
@@ -42,11 +39,6 @@ export class CatalogoModalesService {
   }
 
   mostrarAviso(texto: string): void {
-    this.aviso.set(texto);
-    window.setTimeout(() => this.aviso.set(""), 3500);
-  }
-
-  limpiarAviso(): void {
-    this.aviso.set("");
+    this.notificaciones.exito(texto);
   }
 }

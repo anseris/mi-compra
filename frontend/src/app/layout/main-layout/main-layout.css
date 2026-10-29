@@ -193,26 +193,6 @@ main {
   border-bottom-color: var(--green);
 }
 
-.layout-error,
-.layout-notice {
-  margin: 12px 0;
-  padding: 11px 14px;
-  border-radius: 9px;
-  font-size: 12px;
-}
-
-.layout-error {
-  border: 1px solid #f6cccf;
-  background: #fdf2f3;
-  color: #b0414e;
-}
-
-.layout-notice {
-  border: 1px solid #cce7d8;
-  background: #f0faf4;
-  color: #176b52;
-}
-
 .tab-icon {
   font-size: 19px;
 }

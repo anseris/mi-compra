@@ -48,11 +48,8 @@
 
     <router-outlet></router-outlet>
 
-    @if (error()) {
-    <div class="layout-error" role="alert">{{ error() }}</div>
-    } @if (aviso()) {
-    <div class="layout-notice" role="status">{{ aviso() }}</div>
-    } @defer (when modal()) { @if (modal()) {
+    <p-toast position="top-right" />
+    @defer (when modal()) { @if (modal()) {
     <app-catalogo-modales />
     } }
 

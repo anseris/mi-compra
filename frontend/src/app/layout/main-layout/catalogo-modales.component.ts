@@ -4,7 +4,6 @@ import { ButtonModule } from "primeng/button";
 import { DialogModule } from "primeng/dialog";
 import { InputNumberModule } from "primeng/inputnumber";
 import { InputTextModule } from "primeng/inputtext";
-import { MessageModule } from "primeng/message";
 import { SelectModule } from "primeng/select";
 import { CategoriasService } from "../../core/services/categorias.service";
 import { CatalogoModalesService } from "../../core/services/catalogo-modales.service";
@@ -12,6 +11,7 @@ import { ProductosService } from "../../core/services/productos.service";
 import { SeccionesService } from "../../core/services/secciones.service";
 import { ListaCompraService } from "../../core/services/lista-compra.service";
 import { mensajeError } from "../../shared/utils/api-error";
+import { NotificacionesService } from "../../shared/services/notificaciones.service";
 import { EMPTY, finalize, forkJoin, switchMap } from "rxjs";
 import type { Producto } from "../../core/models/producto.model";
 
@@ -27,7 +27,6 @@ function normalizarNombreProducto(nombre: string): string {
     DialogModule,
     InputNumberModule,
     InputTextModule,
-    MessageModule,
     SelectModule,
   ],
   templateUrl: "./catalogo-modales.component.html",
@@ -38,12 +37,12 @@ export class CatalogoModalesComponent implements OnInit {
   private readonly seccionesService = inject(SeccionesService);
   private readonly listaService = inject(ListaCompraService);
   private readonly modalesService = inject(CatalogoModalesService);
+  private readonly notificaciones = inject(NotificacionesService);
 
   readonly categorias = this.categoriasService.categorias;
   readonly secciones = this.seccionesService.secciones;
   readonly listas = this.listaService.listas;
   readonly modal = this.modalesService.modal;
-  readonly error = signal("");
   readonly guardandoProducto = signal(false);
   readonly guardandoLista = signal(false);
   readonly seccionSeleccionada = signal("");
@@ -71,7 +70,6 @@ export class CatalogoModalesComponent implements OnInit {
       const modal = this.modal();
       if (modal?.tipo === "lista") {
         this.nombreNuevaLista = "";
-        this.error.set("");
         return;
       }
 
@@ -89,7 +87,6 @@ export class CatalogoModalesComponent implements OnInit {
         this.seccionSeleccionada.set(producto.seccion ?? "");
         this.subseccionSeleccionada = producto.subseccion ?? "";
       }
-      this.error.set("");
     });
   }
 
@@ -106,11 +103,11 @@ export class CatalogoModalesComponent implements OnInit {
         }
       },
       error: (error: unknown) =>
-        this.error.set(mensajeError(error, "No se pudieron cargar las categorías.")),
+        this.notificaciones.error(mensajeError(error, "No se pudieron cargar las categorías.")),
     });
     this.seccionesService.cargar().subscribe({
       error: (error: unknown) =>
-        this.error.set(mensajeError(error, "No se pudieron cargar las secciones.")),
+        this.notificaciones.error(mensajeError(error, "No se pudieron cargar las secciones.")),
     });
   }
 
@@ -126,11 +123,9 @@ export class CatalogoModalesComponent implements OnInit {
       this.limpiarFormularioProducto();
     }
     this.modalesService.cerrar();
-    this.error.set("");
   }
 
   guardarProducto(): void {
-    this.error.set("");
     if (this.guardandoProducto()) {
       return;
     }
@@ -139,19 +134,19 @@ export class CatalogoModalesComponent implements OnInit {
     const precio = Number(this.precio);
 
     if (!nombre) {
-      this.error.set("Escribe el nombre del producto.");
+      this.notificaciones.error("Escribe el nombre del producto.");
       return;
     }
     if (this.precio === null || !Number.isFinite(precio) || precio < 0) {
-      this.error.set("Indica un precio válido (0 o más).");
+      this.notificaciones.error("Indica un precio válido (0 o más).");
       return;
     }
     if (!this.categoriaSeleccionada) {
-      this.error.set("Crea o selecciona una categoría.");
+      this.notificaciones.error("Crea o selecciona una categoría.");
       return;
     }
     if (!this.editandoId && !this.seccionSeleccionada()) {
-      this.error.set("Selecciona una sección.");
+      this.notificaciones.error("Selecciona una sección.");
       return;
     }
 
@@ -181,7 +176,7 @@ export class CatalogoModalesComponent implements OnInit {
                 nombreNormalizado,
             );
             if (duplicadoEnLista || duplicadoEnCatalogo) {
-              this.error.set(
+              this.notificaciones.error(
                 duplicadoEnLista
                   ? `«${nombre}» ya está en la lista. No se ha guardado el producto.`
                   : `Ya existe un producto llamado «${nombre}» en el catálogo.`,
@@ -209,7 +204,7 @@ export class CatalogoModalesComponent implements OnInit {
           this.modalesService.mostrarAviso(aviso);
         },
         error: (error: unknown) =>
-          this.error.set(
+          this.notificaciones.error(
             mensajeError(error, "No se pudo guardar el producto."),
           ),
       });
@@ -218,15 +213,14 @@ export class CatalogoModalesComponent implements OnInit {
   crearCategoria(): void {
     const nombre = this.nombreNuevaCategoria.trim();
     if (!nombre) {
-      this.error.set("Escribe el nombre de la categoría.");
+      this.notificaciones.error("Escribe el nombre de la categoría.");
       return;
     }
     if (this.categorias().some((categoria) => categoria.nombre.toLocaleLowerCase("es") === nombre.toLocaleLowerCase("es"))) {
-      this.error.set("Ya existe una categoría con ese nombre.");
+      this.notificaciones.error("Ya existe una categoría con ese nombre.");
       return;
     }
 
-    this.error.set("");
     this.categoriasService.crear({ nombre, icono: "🛍️" }).subscribe({
       next: (categoria) => {
         this.nombreNuevaCategoria = "";
@@ -234,18 +228,17 @@ export class CatalogoModalesComponent implements OnInit {
         this.modalesService.mostrarAviso(`Categoría «${categoria.nombre}» creada.`);
       },
       error: (error: unknown) =>
-        this.error.set(mensajeError(error, "No se pudo crear la categoría.")),
+        this.notificaciones.error(mensajeError(error, "No se pudo crear la categoría.")),
     });
   }
 
   crearSeccion(): void {
     const nombre = this.nombreNuevaSeccion.trim();
     if (!nombre) {
-      this.error.set("Escribe el nombre de la sección.");
+      this.notificaciones.error("Escribe el nombre de la sección.");
       return;
     }
 
-    this.error.set("");
     this.seccionesService.crear(nombre).subscribe({
       next: (seccion) => {
         this.nombreNuevaSeccion = "";
@@ -253,7 +246,7 @@ export class CatalogoModalesComponent implements OnInit {
         this.modalesService.mostrarAviso(`Sección «${seccion.nombre}» creada.`);
       },
       error: (error: unknown) =>
-        this.error.set(mensajeError(error, "No se pudo crear la sección.")),
+        this.notificaciones.error(mensajeError(error, "No se pudo crear la sección.")),
     });
   }
 
@@ -261,15 +254,14 @@ export class CatalogoModalesComponent implements OnInit {
     const seccionId = this.seccionParaSubseccion();
     const nombre = this.nombreNuevaSubseccion.trim();
     if (!seccionId) {
-      this.error.set("Selecciona la sección de la nueva subsección.");
+      this.notificaciones.error("Selecciona la sección de la nueva subsección.");
       return;
     }
     if (!nombre) {
-      this.error.set("Escribe el nombre de la subsección.");
+      this.notificaciones.error("Escribe el nombre de la subsección.");
       return;
     }
 
-    this.error.set("");
     this.seccionesService.crearSubseccion(seccionId, nombre).subscribe({
       next: (seccion) => {
         this.nombreNuevaSubseccion = "";
@@ -279,21 +271,20 @@ export class CatalogoModalesComponent implements OnInit {
         this.modalesService.mostrarAviso(`Subsección «${nombre}» añadida a «${seccion.nombre}».`);
       },
       error: (error: unknown) =>
-        this.error.set(mensajeError(error, "No se pudo crear la subsección.")),
+        this.notificaciones.error(mensajeError(error, "No se pudo crear la subsección.")),
     });
   }
 
   crearLista(): void {
     const nombre = this.nombreNuevaLista.trim();
     if (!nombre) {
-      this.error.set("Escribe un nombre para la lista.");
+      this.notificaciones.error("Escribe un nombre para la lista.");
       return;
     }
     if (this.guardandoLista()) {
       return;
     }
 
-    this.error.set("");
     this.guardandoLista.set(true);
     this.listaService
       .cargar()
@@ -308,7 +299,7 @@ export class CatalogoModalesComponent implements OnInit {
               nombreNormalizado,
           );
           if (duplicada) {
-            this.error.set("Ya existe una lista con ese nombre.");
+            this.notificaciones.error("Ya existe una lista con ese nombre.");
             return EMPTY;
           }
           return this.listaService.crearLista(nombre);
@@ -324,7 +315,7 @@ export class CatalogoModalesComponent implements OnInit {
           );
         },
         error: (error: unknown) =>
-          this.error.set(mensajeError(error, "No se pudo crear la lista.")),
+          this.notificaciones.error(mensajeError(error, "No se pudo crear la lista.")),
       });
   }
 

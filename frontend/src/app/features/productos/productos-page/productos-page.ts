@@ -10,10 +10,10 @@ import { ListaCompraService } from "../../../core/services/lista-compra.service"
 import { ProductosService } from "../../../core/services/productos.service";
 import { SeccionesService } from "../../../core/services/secciones.service";
 import { CatalogoModalesService } from "../../../core/services/catalogo-modales.service";
+import { NotificacionesService } from "../../../shared/services/notificaciones.service";
 import { mensajeError } from "../../../shared/utils/api-error";
 import { CardModule } from "primeng/card";
 import { InputTextModule } from "primeng/inputtext";
-import { MessageModule } from "primeng/message";
 import { DividerModule } from "primeng/divider";
 import { EMPTY, finalize, switchMap } from "rxjs";
 
@@ -30,7 +30,6 @@ function claveNombreProducto(nombre: string): string {
     CardModule,
     SelectModule,
     InputTextModule,
-    MessageModule,
     DividerModule,
   ],
   templateUrl: "./productos-page.html",
@@ -42,6 +41,7 @@ export class ProductosPage implements OnInit {
   private readonly seccionesService = inject(SeccionesService);
   private readonly listaService = inject(ListaCompraService);
   private readonly modalesService = inject(CatalogoModalesService);
+  private readonly notificaciones = inject(NotificacionesService);
 
   readonly productos = this.productosService.productos;
   readonly categorias = this.categoriasService.categorias;
@@ -74,8 +74,6 @@ export class ProductosPage implements OnInit {
       this.listaService.cargando(),
   );
 
-  readonly error = signal("");
-  readonly aviso = signal("");
   readonly busqueda = signal("");
   readonly filtroCategoria = signal("todas");
   readonly filtroSeccion = signal("todas");
@@ -181,7 +179,7 @@ export class ProductosPage implements OnInit {
   ngOnInit(): void {
     this.categoriasService.cargar().subscribe({
       error: (error: unknown) => {
-        this.error.set(
+        this.notificaciones.error(
           mensajeError(error, "No se pudieron cargar las categorías."),
         );
       },
@@ -189,13 +187,13 @@ export class ProductosPage implements OnInit {
 
     this.productosService.cargar().subscribe({
       error: (error: unknown) => {
-        this.error.set(mensajeError(error, "No se pudo cargar el catálogo."));
+        this.notificaciones.error(mensajeError(error, "No se pudo cargar el catálogo."));
       },
     });
 
     this.seccionesService.cargar().subscribe({
       error: (error: unknown) => {
-        this.error.set(
+        this.notificaciones.error(
           mensajeError(error, "No se pudieron cargar las secciones."),
         );
       },
@@ -203,7 +201,7 @@ export class ProductosPage implements OnInit {
 
     this.listaService.cargar().subscribe({
       error: (error: unknown) => {
-        this.error.set(
+        this.notificaciones.error(
           mensajeError(error, "No se pudo cargar el estado de la lista."),
         );
       },
@@ -242,11 +240,10 @@ export class ProductosPage implements OnInit {
   }
 
   cambiarLista(id: string): void {
-    this.error.set("");
     this.busqueda.set("");
     this.listaService.seleccionarLista(id).subscribe({
       error: (error: unknown) =>
-        this.error.set(
+        this.notificaciones.error(
           mensajeError(error, "No se pudo cargar la lista seleccionada."),
         ),
     });
@@ -266,12 +263,11 @@ export class ProductosPage implements OnInit {
       return;
     }
 
-    this.error.set("");
     this.listaService.eliminarLista(lista._id).subscribe({
       next: () =>
-        this.mostrarAviso(`Lista «${lista.nombre}» eliminada.`),
+        this.notificaciones.exito(`Lista «${lista.nombre}» eliminada.`),
       error: (error: unknown) =>
-        this.error.set(
+        this.notificaciones.error(
           mensajeError(error, "No se pudo eliminar la lista."),
         ),
     });
@@ -286,24 +282,21 @@ export class ProductosPage implements OnInit {
       return;
     }
 
-    this.error.set("");
-
     this.productosService.eliminar(producto._id).subscribe({
       next: () => {
-        this.mostrarAviso(`«${producto.nombre}» eliminado del catálogo.`);
+        this.notificaciones.exito(`«${producto.nombre}» eliminado del catálogo.`);
       },
       error: (error: unknown) => {
-        this.error.set(mensajeError(error, "No se pudo eliminar el producto."));
+        this.notificaciones.error(mensajeError(error, "No se pudo eliminar el producto."));
       },
     });
   }
 
   anadirALista(producto: Producto): void {
-    this.error.set("");
     const claveNombre = claveNombreProducto(producto.nombre);
 
     if (this.productosAnadiendo().has(claveNombre)) {
-      this.mostrarAviso(`«${producto.nombre}» se está añadiendo a la lista.`);
+      this.notificaciones.info(`«${producto.nombre}» se está añadiendo a la lista.`);
       return;
     }
 
@@ -318,7 +311,7 @@ export class ProductosPage implements OnInit {
             (item) => claveNombreProducto(item.nombre) === claveNombre,
           );
           if (nombreYaExiste) {
-            this.mostrarAviso(
+            this.notificaciones.info(
               `«${producto.nombre}» ya está en la lista y no se ha añadido otra vez.`,
             );
             return EMPTY;
@@ -338,18 +331,17 @@ export class ProductosPage implements OnInit {
       )
       .subscribe({
         next: () =>
-          this.mostrarAviso(
+          this.notificaciones.exito(
             `«${producto.nombre}» añadido a «${this.listaService.listaSeleccionada()?.nombre ?? "la lista"}».`,
           ),
         error: (error: unknown) =>
-          this.error.set(
+          this.notificaciones.error(
             mensajeError(error, "No se pudo añadir el producto a la lista."),
           ),
       });
   }
 
   quitarDeLista(producto: Producto): void {
-    this.error.set("");
     const item = this.listaService
       .items()
       .find(
@@ -363,9 +355,9 @@ export class ProductosPage implements OnInit {
 
     this.listaService.eliminar(item._id).subscribe({
       next: () =>
-        this.mostrarAviso(`«${producto.nombre}» quitado de la lista.`),
+        this.notificaciones.exito(`«${producto.nombre}» quitado de la lista.`),
       error: (error: unknown) =>
-        this.error.set(
+        this.notificaciones.error(
           mensajeError(error, "No se pudo quitar el producto de la lista."),
         ),
     });
@@ -387,8 +379,4 @@ export class ProductosPage implements OnInit {
     this.modalesService.abrirLista();
   }
 
-  private mostrarAviso(texto: string): void {
-    this.aviso.set(texto);
-    window.setTimeout(() => this.aviso.set(""), 3500);
-  }
 }
