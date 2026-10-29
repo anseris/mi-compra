@@ -84,7 +84,6 @@ main {
 }
 
 .hero {
-  min-height: 236px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -109,7 +108,6 @@ main {
 }
 
 .hero h1 {
-  font: 800 clamp(28px, 3.1vw, 42px) / 1.17 'Manrope', sans-serif;
   letter-spacing: -1.7px;
   margin: 14px 0 11px;
 }
@@ -130,19 +128,18 @@ main {
   position: relative;
   display: grid;
   place-items: center;
-  margin-right: 55px;
 }
 
 .art-circle {
-  width: 160px;
-  height: 160px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   background: #e5f2e9;
   position: absolute;
 }
 
 .art-bag {
-  font-size: 92px;
+  font-size: 75px;
   position: relative;
   filter: drop-shadow(0 12px 12px #315d441a);
   transform: rotate(-7deg);
