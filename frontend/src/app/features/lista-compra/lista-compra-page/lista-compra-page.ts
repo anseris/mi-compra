@@ -176,9 +176,9 @@ export class ListaCompraPage implements OnInit {
     this.filtroSubseccion.set("todas");
   }
 
-  alternar(item: ItemLista): void {
+  alternar(item: ItemLista, comprado = !item.comprado): void {
     this.listaService
-      .actualizar(item._id, { comprado: !item.comprado })
+      .actualizar(item._id, { comprado })
       .subscribe({
         error: (error: unknown) => {
           this.notificaciones.error(

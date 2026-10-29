@@ -5,7 +5,7 @@
         <div
           class="product-header flex align-items-center justify-content-between gap-3 p-3"
         >
-          <div>
+          <!-- <div>
             <div class="text-sm text-primary font-semibold">
               TU DESPENSA DIGITAL
             </div>
@@ -18,7 +18,7 @@
             <div class="text-sm text-color-secondary">
               Tu catálogo personal, siempre a mano.
             </div>
-          </div>
+          </div> -->
           <div class="active-list-control">
             <p-select
               class="w-full p-0"
@@ -195,10 +195,10 @@
               </div>
             </ng-template>
             <div class="flex flex-column gap-2">
-              <div class="text-sm text-primary">
+              <div class="text-sm text-primary hidden md:block">
                 {{ nombreCategoria(producto) }}
               </div>
-              <div class="text-sm text-color-secondary">
+              <div class="text-sm text-color-secondary hidden md:block">
                 {{ nombreSeccion(producto) }}@if (producto.subseccion) { · {{
                 producto.subseccion }}}
               </div>
@@ -237,10 +237,10 @@
               <span class="product-added-label">En la lista</span>
               }
             </div>
-            <div class="text-sm text-primary mt-1">
+            <div class="text-sm text-primary mt-1 hidden md:block">
               {{ nombreCategoria(producto) }}
             </div>
-            <div class="text-sm text-color-secondary">
+            <div class="text-sm text-color-secondary hidden md:block">
               {{ nombreSeccion(producto) }}@if (producto.subseccion) { · {{
               producto.subseccion }}}
             </div>
