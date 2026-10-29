@@ -4,6 +4,7 @@ import { Component, computed, inject, OnInit, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { RouterLink } from "@angular/router";
 import { ButtonModule } from "primeng/button";
+import { ConfirmationService } from "primeng/api";
 import { SelectModule } from "primeng/select";
 import type { Categoria } from "../../../core/models/categoria.model";
 import type { ItemLista } from "../../../core/models/item-lista.model";
@@ -42,6 +43,7 @@ export class ListaCompraPage implements OnInit {
   private readonly categoriasService = inject(CategoriasService);
   private readonly seccionesService = inject(SeccionesService);
   private readonly notificaciones = inject(NotificacionesService);
+  private readonly confirmationService = inject(ConfirmationService);
 
   readonly items = this.listaService.items;
   readonly categorias = this.categoriasService.categorias;
@@ -212,19 +214,21 @@ export class ListaCompraPage implements OnInit {
   }
 
   vaciarComprados(): void {
-    if (
-      !window.confirm(
-        "¿Quitar de la lista todos los artículos marcados como comprados?",
-      )
-    ) {
-      return;
-    }
-
-    this.listaService.vaciarComprados().subscribe({
-      error: (error: unknown) => {
-        this.notificaciones.error(
-          mensajeError(error, "No se pudieron quitar los artículos comprados."),
-        );
+    this.confirmationService.confirm({
+      header: "Quitar artículos comprados",
+      message: "¿Quitar de la lista todos los artículos marcados como comprados?",
+      icon: "pi pi-exclamation-triangle",
+      acceptLabel: "Quitar",
+      rejectLabel: "Cancelar",
+      acceptButtonStyleClass: "p-button-danger",
+      accept: () => {
+        this.listaService.vaciarComprados().subscribe({
+          error: (error: unknown) => {
+            this.notificaciones.error(
+              mensajeError(error, "No se pudieron quitar los artículos comprados."),
+            );
+          },
+        });
       },
     });
   }

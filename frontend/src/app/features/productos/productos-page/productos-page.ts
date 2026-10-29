@@ -3,6 +3,7 @@ import { CurrencyPipe } from "@angular/common";
 import { Component, computed, inject, OnInit, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ButtonModule } from "primeng/button";
+import { ConfirmationService } from "primeng/api";
 import type { Categoria } from "../../../core/models/categoria.model";
 import type { Producto } from "../../../core/models/producto.model";
 import { CategoriasService } from "../../../core/services/categorias.service";
@@ -42,6 +43,7 @@ export class ProductosPage implements OnInit {
   private readonly listaService = inject(ListaCompraService);
   private readonly modalesService = inject(CatalogoModalesService);
   private readonly notificaciones = inject(NotificacionesService);
+  private readonly confirmationService = inject(ConfirmationService);
 
   readonly productos = this.productosService.productos;
   readonly categorias = this.categoriasService.categorias;
@@ -255,39 +257,45 @@ export class ProductosPage implements OnInit {
       return;
     }
 
-    if (
-      !window.confirm(
-        `¿Eliminar la lista «${lista.nombre}» y todos sus artículos? Esta acción no se puede deshacer.`,
-      )
-    ) {
-      return;
-    }
-
-    this.listaService.eliminarLista(lista._id).subscribe({
-      next: () =>
-        this.notificaciones.exito(`Lista «${lista.nombre}» eliminada.`),
-      error: (error: unknown) =>
-        this.notificaciones.error(
-          mensajeError(error, "No se pudo eliminar la lista."),
-        ),
+    this.confirmationService.confirm({
+      header: "Eliminar lista",
+      message: `¿Eliminar la lista «${lista.nombre}» y todos sus artículos? Esta acción no se puede deshacer.`,
+      icon: "pi pi-exclamation-triangle",
+      acceptLabel: "Eliminar",
+      rejectLabel: "Cancelar",
+      acceptButtonStyleClass: "p-button-danger",
+      accept: () => {
+        this.listaService.eliminarLista(lista._id).subscribe({
+          next: () =>
+            this.notificaciones.exito(`Lista «${lista.nombre}» eliminada.`),
+          error: (error: unknown) =>
+            this.notificaciones.error(
+              mensajeError(error, "No se pudo eliminar la lista."),
+            ),
+        });
+      },
     });
   }
 
   eliminarProducto(producto: Producto): void {
-    if (
-      !window.confirm(
-        `¿Eliminar «${producto.nombre}» del catálogo? Los artículos que ya estén en la lista se conservarán.`,
-      )
-    ) {
-      return;
-    }
-
-    this.productosService.eliminar(producto._id).subscribe({
-      next: () => {
-        this.notificaciones.exito(`«${producto.nombre}» eliminado del catálogo.`);
-      },
-      error: (error: unknown) => {
-        this.notificaciones.error(mensajeError(error, "No se pudo eliminar el producto."));
+    this.confirmationService.confirm({
+      header: "Eliminar producto",
+      message: `¿Eliminar «${producto.nombre}» del catálogo? Los artículos que ya estén en la lista se conservarán.`,
+      icon: "pi pi-exclamation-triangle",
+      acceptLabel: "Eliminar",
+      rejectLabel: "Cancelar",
+      acceptButtonStyleClass: "p-button-danger",
+      accept: () => {
+        this.productosService.eliminar(producto._id).subscribe({
+          next: () => {
+            this.notificaciones.exito(`«${producto.nombre}» eliminado del catálogo.`);
+          },
+          error: (error: unknown) => {
+            this.notificaciones.error(
+              mensajeError(error, "No se pudo eliminar el producto."),
+            );
+          },
+        });
       },
     });
   }

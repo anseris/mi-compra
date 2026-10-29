@@ -1,5 +1,6 @@
 import { Component, computed, inject, OnInit } from "@angular/core";
 import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
+import { ConfirmDialogModule } from "primeng/confirmdialog";
 import { ToastModule } from "primeng/toast";
 import { CatalogoModalesService } from "../../core/services/catalogo-modales.service";
 import { ListaCompraService } from "../../core/services/lista-compra.service";
@@ -15,6 +16,7 @@ import { CatalogoModalesComponent } from "./catalogo-modales.component";
     RouterLink,
     RouterLinkActive,
     CatalogoModalesComponent,
+    ConfirmDialogModule,
     ToastModule,
   ],
   templateUrl: "./main-layout.html",
