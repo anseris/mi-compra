@@ -44,19 +44,4 @@ export class MainLayout implements OnInit {
     });
   }
 
-  abrirProducto(): void {
-    this.modalesService.abrirProducto();
-  }
-
-  abrirCategoria(): void {
-    this.modalesService.abrirCategoria();
-  }
-
-  abrirSecciones(): void {
-    this.modalesService.abrirSecciones();
-  }
-
-  abrirCrearLista(): void {
-    this.modalesService.abrirLista();
-  }
 }

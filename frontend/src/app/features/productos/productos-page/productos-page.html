@@ -22,7 +22,9 @@
   <div class="col-12">
     <p-card>
       <ng-template pTemplate="header">
-        <div class="flex align-items-center justify-content-between p-3">
+        <div
+          class="product-header flex align-items-center justify-content-between gap-3 p-3"
+        >
           <div>
             <div class="text-sm text-primary font-semibold">
               TU DESPENSA DIGITAL
@@ -37,43 +39,72 @@
               Tu catálogo personal, siempre a mano.
             </div>
           </div>
-          <i class="pi pi-th-large text-4xl text-primary"></i>
+          <div class="active-list-control">
+            <p-select
+              class="w-full p-0"
+              inputId="listaActivaProductos"
+              name="listaActivaProductos"
+              [options]="opcionesLista()"
+              [ngModel]="listaSeleccionadaId()"
+              (ngModelChange)="cambiarLista($event)"
+              optionLabel="nombre"
+              optionValue="valor"
+              placeholder="Selecciona una lista"
+              ariaLabel="Lista activa"
+              [disabled]="cargando()"
+            />
+            @if (listaSeleccionada() && !listaSeleccionada()?.predeterminada) {
+            <p-button
+              icon="pi pi-trash"
+              [rounded]="true"
+              [text]="true"
+              severity="danger"
+              [ariaLabel]="'Eliminar lista ' + listaSeleccionada()?.nombre"
+              [disabled]="cargando()"
+              (onClick)="eliminarLista()"
+            />
+            }
+          </div>
+          <div class="product-header-actions">
+            <div
+              class="flex align-items-center gap-1"
+              role="group"
+              aria-label="Acciones del catálogo"
+            >
+              <p-button
+                icon="pi pi-plus"
+                [rounded]="true"
+                [text]="true"
+                aria-label="Añadir producto"
+                (onClick)="abrirNuevoProducto()"
+              />
+              <p-button
+                icon="pi pi-tags"
+                [rounded]="true"
+                [text]="true"
+                aria-label="Crear categoría"
+                (onClick)="abrirCrearCategoria()"
+              />
+              <p-button
+                icon="pi pi-sitemap"
+                [rounded]="true"
+                [text]="true"
+                aria-label="Gestionar secciones"
+                (onClick)="abrirGestionSecciones()"
+              />
+              <p-button
+                icon="pi pi-list"
+                [rounded]="true"
+                [text]="true"
+                aria-label="Crear lista"
+                (onClick)="abrirCrearLista()"
+              />
+            </div>
+          </div>
         </div>
       </ng-template>
 
-      <div class="active-list-toolbar">
-        <div class="active-list-selector">
-          <label for="listaActivaProductos">Lista activa</label>
-          <p-select
-            class="w-full"
-            inputId="listaActivaProductos"
-            name="listaActivaProductos"
-            [options]="opcionesLista()"
-            [ngModel]="listaSeleccionadaId()"
-            (ngModelChange)="cambiarLista($event)"
-            optionLabel="nombre"
-            optionValue="valor"
-            placeholder="Selecciona una lista"
-            [disabled]="cargando()"
-          />
-          @if (listaSeleccionada()) {
-          <span class="active-list-caption">
-            Añadiendo productos a «{{ listaSeleccionada()?.nombre }}»
-          </span>
-          }
-        </div>
-        <!-- <p-button
-          label="Crear lista"
-          icon="pi pi-plus"
-          [outlined]="true"
-          type="button"
-          (onClick)="abrirCrearLista()"
-        /> -->
-      </div>
-
-      <div
-        class="product-catalog-filters flex flex-column md:flex-row md:flex-wrap gap-2 mb-3"
-      >
+      <div class="product-catalog-filters">
         <div class="search-box product-catalog-search">
           <span>⌕</span>
           <input
@@ -85,7 +116,7 @@
         </div>
 
         <p-select
-          class="p-0 product-catalog-filter"
+          class="w-full p-0"
           inputId="filtroProductoCategoria"
           name="filtroProductoCategoria"
           [options]="opcionesFiltroCategoria()"
@@ -97,7 +128,7 @@
           ariaLabel="Filtrar por categoría"
         />
         <p-select
-          class="p-0 product-catalog-filter"
+          class="w-full p-0"
           inputId="filtroProductoSeccion"
           name="filtroProductoSeccion"
           [options]="opcionesFiltroSeccion()"
@@ -109,7 +140,7 @@
           ariaLabel="Filtrar por sección"
         />
         <p-select
-          class="p-0 product-catalog-filter"
+          class="w-full p-0"
           inputId="filtroProductoSubseccion"
           name="filtroProductoSubseccion"
           [options]="opcionesFiltroSubseccion()"
@@ -121,6 +152,26 @@
           ariaLabel="Filtrar por subsección"
           [disabled]="filtroSeccion() === 'todas' || filtroSeccion() === 'sin-seccion' || opcionesFiltroSubseccion().length === 1"
         />
+        <div
+          class="product-catalog-view-toggle"
+          role="group"
+          aria-label="Vista del catálogo"
+        >
+          <p-button
+            label=""
+            icon="pi pi-th-large"
+            [outlined]="vista() !== 'cards'"
+            [attr.aria-pressed]="vista() === 'cards'"
+            (onClick)="vista.set('cards')"
+          />
+          <p-button
+            label=""
+            icon="pi pi-list"
+            [outlined]="vista() !== 'listado'"
+            [attr.aria-pressed]="vista() === 'listado'"
+            (onClick)="vista.set('listado')"
+          />
+        </div>
       </div>
 
       @if (cargando()) {
@@ -133,29 +184,7 @@
           Estamos recuperando tus productos guardados.
         </div>
       </div>
-      } @else if (productosFiltrados().length) {
-      <div
-        class="flex justify-content-end gap-2 mb-3"
-        role="group"
-        aria-label="Vista del catálogo"
-      >
-        <p-button
-          label=""
-          icon="pi pi-th-large"
-          [outlined]="vista() !== 'cards'"
-          [attr.aria-pressed]="vista() === 'cards'"
-          (onClick)="vista.set('cards')"
-        />
-        <p-button
-          label=""
-          icon="pi pi-list"
-          [outlined]="vista() !== 'listado'"
-          [attr.aria-pressed]="vista() === 'listado'"
-          (onClick)="vista.set('listado')"
-        />
-      </div>
-
-      @if (vista() === 'cards') {
+      } @else if (productosFiltrados().length) { @if (vista() === 'cards') {
       <div class="product-grid">
         @for (producto of productosFiltrados(); track producto._id) {
         <div [class.product-added-card]="productoEnLista(producto)">

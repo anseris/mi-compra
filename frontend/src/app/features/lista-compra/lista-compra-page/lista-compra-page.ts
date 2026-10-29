@@ -46,9 +46,7 @@ export class ListaCompraPage implements OnInit {
   readonly items = this.listaService.items;
   readonly categorias = this.categoriasService.categorias;
   readonly secciones = this.seccionesService.secciones;
-  readonly listas = this.listaService.listas;
   readonly listaSeleccionada = this.listaService.listaSeleccionada;
-  readonly listaSeleccionadaId = this.listaService.listaSeleccionadaId;
   readonly cargando = this.listaService.cargando;
   readonly busqueda = signal("");
   readonly error = signal("");
@@ -56,10 +54,6 @@ export class ListaCompraPage implements OnInit {
   readonly filtroCategoria = signal("todas");
   readonly filtroSeccion = signal("todas");
   readonly filtroSubseccion = signal("todas");
-
-  readonly opcionesLista = computed(() =>
-    this.listas().map((lista) => ({ nombre: lista.nombre, valor: lista._id })),
-  );
 
   readonly opcionesFiltroCategoria = computed(() => [
     { nombre: "Todas las categorías", valor: "todas" },
@@ -173,48 +167,6 @@ export class ListaCompraPage implements OnInit {
         this.error.set(
           mensajeError(error, "No se pudo cargar la lista de la compra."),
         );
-      },
-    });
-  }
-
-  eliminarLista(): void {
-    const lista = this.listaSeleccionada();
-
-    if (!lista || lista.predeterminada) {
-      return;
-    }
-
-    if (
-      !window.confirm(
-        `¿Eliminar la lista «${lista.nombre}» y todos sus artículos? Esta acción no se puede deshacer.`,
-      )
-    ) {
-      return;
-    }
-
-    this.error.set("");
-    this.listaService.eliminarLista(lista._id).subscribe({
-      next: () => {
-        this.filtroCategoria.set("todas");
-        this.busqueda.set("");
-        this.aviso.set(`Lista «${lista.nombre}» eliminada.`);
-      },
-      error: (error: unknown) => {
-        this.error.set(mensajeError(error, "No se pudo eliminar la lista."));
-      },
-    });
-  }
-
-  cambiarLista(id: string): void {
-    this.error.set("");
-    this.busqueda.set("");
-    this.filtroCategoria.set("todas");
-    this.filtroSeccion.set("todas");
-    this.filtroSubseccion.set("todas");
-
-    this.listaService.seleccionarLista(id).subscribe({
-      error: (error: unknown) => {
-        this.error.set(mensajeError(error, "No se pudo cargar la lista seleccionada."));
       },
     });
   }

@@ -49,6 +49,12 @@ export class ProductosPage implements OnInit {
   readonly listas = this.listaService.listas;
   readonly listaSeleccionada = this.listaService.listaSeleccionada;
   readonly listaSeleccionadaId = this.listaService.listaSeleccionadaId;
+  readonly opcionesLista = computed(() =>
+    this.listas().map((lista) => ({
+      nombre: lista.nombre,
+      valor: lista._id,
+    })),
+  );
   readonly vista = signal<"cards" | "listado">("cards");
   readonly productosEnLista = computed(
     () =>
@@ -82,13 +88,6 @@ export class ProductosPage implements OnInit {
       valor: categoria._id,
     })),
   ]);
-
-  readonly opcionesLista = computed(() =>
-    this.listas().map((lista) => ({
-      nombre: lista.nombre,
-      valor: lista._id,
-    })),
-  );
 
   readonly opcionesFiltroSeccion = computed(() => [
     { nombre: "Todas las secciones", valor: "todas" },
@@ -244,10 +243,36 @@ export class ProductosPage implements OnInit {
 
   cambiarLista(id: string): void {
     this.error.set("");
+    this.busqueda.set("");
     this.listaService.seleccionarLista(id).subscribe({
       error: (error: unknown) =>
         this.error.set(
           mensajeError(error, "No se pudo cargar la lista seleccionada."),
+        ),
+    });
+  }
+
+  eliminarLista(): void {
+    const lista = this.listaSeleccionada();
+    if (!lista || lista.predeterminada) {
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `¿Eliminar la lista «${lista.nombre}» y todos sus artículos? Esta acción no se puede deshacer.`,
+      )
+    ) {
+      return;
+    }
+
+    this.error.set("");
+    this.listaService.eliminarLista(lista._id).subscribe({
+      next: () =>
+        this.mostrarAviso(`Lista «${lista.nombre}» eliminada.`),
+      error: (error: unknown) =>
+        this.error.set(
+          mensajeError(error, "No se pudo eliminar la lista."),
         ),
     });
   }
@@ -348,6 +373,18 @@ export class ProductosPage implements OnInit {
 
   abrirNuevoProducto(): void {
     this.modalesService.abrirProducto();
+  }
+
+  abrirCrearCategoria(): void {
+    this.modalesService.abrirCategoria();
+  }
+
+  abrirGestionSecciones(): void {
+    this.modalesService.abrirSecciones();
+  }
+
+  abrirCrearLista(): void {
+    this.modalesService.abrirLista();
   }
 
   private mostrarAviso(texto: string): void {

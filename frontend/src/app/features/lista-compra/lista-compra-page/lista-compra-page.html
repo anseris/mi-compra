@@ -24,35 +24,6 @@
         </p-message>
       }
 
-      <div class="flex flex-column md:flex-row gap-3 mb-3 align-items-end">
-        <div class="flex flex-column gap-2 flex-1">
-          <label for="listaActual" class="text-sm font-semibold">Lista activa</label>
-          <p-select
-            class="p-0 w-full"
-            id="listaActual"
-            name="listaActual"
-            [options]="opcionesLista()"
-            [ngModel]="listaSeleccionadaId()"
-            (ngModelChange)="cambiarLista($event)"
-            optionLabel="nombre"
-            optionValue="valor"
-            placeholder="Selecciona una lista"
-            [disabled]="cargando()"
-          />
-        </div>
-        @if (listaSeleccionada() && !listaSeleccionada()?.predeterminada) {
-          <p-button
-            label="Eliminar lista"
-            icon="pi pi-trash"
-            severity="danger"
-            [outlined]="true"
-            type="button"
-            [disabled]="cargando()"
-            (onClick)="eliminarLista()"
-          />
-        }
-      </div>
-
       <div class="flex flex-column md:flex-row gap-2 mb-3 align-items-center">
         <div class="search-box flex-1">
           <span>⌕</span>

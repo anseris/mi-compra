@@ -46,32 +46,6 @@
       </a>
     </nav>
 
-    <div class="layout-catalog-actions" aria-label="Acciones del catálogo">
-      <button
-        class="catalog-action primary"
-        type="button"
-        (click)="abrirProducto()"
-      >
-        <span aria-hidden="true">＋</span> Añadir producto
-      </button>
-      <button class="catalog-action" type="button" (click)="abrirCategoria()">
-        <span aria-hidden="true">▦</span> Crear categoría
-      </button>
-      <button class="catalog-action" type="button" (click)="abrirSecciones()">
-        <span aria-hidden="true">☷</span> Gestionar secciones
-      </button>
-      <button class="catalog-action" type="button" (click)="abrirCrearLista()">
-        <span aria-hidden="true">☷</span> Crear lista
-      </button>
-      <!-- <p-button
-        label="Crear lista"
-        icon="pi pi-plus"
-        [outlined]="true"
-        type="button"
-        (onClick)="abrirCrearLista()"
-      /> -->
-    </div>
-
     <router-outlet></router-outlet>
 
     @if (error()) {
