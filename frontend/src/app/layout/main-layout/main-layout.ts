@@ -8,7 +8,12 @@ import { CatalogoModalesComponent } from "./catalogo-modales.component";
 
 @Component({
   selector: "app-main-layout",
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CatalogoModalesComponent],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    CatalogoModalesComponent,
+  ],
   templateUrl: "./main-layout.html",
   styleUrl: "./main-layout.css",
 })
@@ -17,7 +22,9 @@ export class MainLayout implements OnInit {
   private readonly listaService = inject(ListaCompraService);
   private readonly modalesService = inject(CatalogoModalesService);
 
-  readonly totalProductos = computed(() => this.productosService.productos().length);
+  readonly totalProductos = computed(
+    () => this.productosService.productos().length,
+  );
   readonly totalLista = computed(() => this.listaService.items().length);
   readonly pendientes = computed(
     () => this.listaService.items().filter((item) => !item.comprado).length,
@@ -47,5 +54,9 @@ export class MainLayout implements OnInit {
 
   abrirSecciones(): void {
     this.modalesService.abrirSecciones();
+  }
+
+  abrirCrearLista(): void {
+    this.modalesService.abrirLista();
   }
 }

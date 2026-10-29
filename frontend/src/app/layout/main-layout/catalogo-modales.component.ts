@@ -41,9 +41,11 @@ export class CatalogoModalesComponent implements OnInit {
 
   readonly categorias = this.categoriasService.categorias;
   readonly secciones = this.seccionesService.secciones;
+  readonly listas = this.listaService.listas;
   readonly modal = this.modalesService.modal;
   readonly error = signal("");
   readonly guardandoProducto = signal(false);
+  readonly guardandoLista = signal(false);
   readonly seccionSeleccionada = signal("");
   readonly seccionParaSubseccion = signal("");
 
@@ -55,6 +57,7 @@ export class CatalogoModalesComponent implements OnInit {
   nombreNuevaCategoria = "";
   nombreNuevaSeccion = "";
   nombreNuevaSubseccion = "";
+  nombreNuevaLista = "";
 
   readonly opcionesSubseccionFormulario = computed(
     () =>
@@ -66,6 +69,12 @@ export class CatalogoModalesComponent implements OnInit {
   constructor() {
     effect(() => {
       const modal = this.modal();
+      if (modal?.tipo === "lista") {
+        this.nombreNuevaLista = "";
+        this.error.set("");
+        return;
+      }
+
       if (modal?.tipo !== "producto") {
         return;
       }
@@ -272,6 +281,51 @@ export class CatalogoModalesComponent implements OnInit {
       error: (error: unknown) =>
         this.error.set(mensajeError(error, "No se pudo crear la subsección.")),
     });
+  }
+
+  crearLista(): void {
+    const nombre = this.nombreNuevaLista.trim();
+    if (!nombre) {
+      this.error.set("Escribe un nombre para la lista.");
+      return;
+    }
+    if (this.guardandoLista()) {
+      return;
+    }
+
+    this.error.set("");
+    this.guardandoLista.set(true);
+    this.listaService
+      .cargar()
+      .pipe(
+        switchMap(() => {
+          const nombreNormalizado = nombre
+            .replace(/\s+/g, " ")
+            .toLocaleLowerCase("es");
+          const duplicada = this.listas().some(
+            (lista) =>
+              lista.nombre.trim().replace(/\s+/g, " ").toLocaleLowerCase("es") ===
+              nombreNormalizado,
+          );
+          if (duplicada) {
+            this.error.set("Ya existe una lista con ese nombre.");
+            return EMPTY;
+          }
+          return this.listaService.crearLista(nombre);
+        }),
+        finalize(() => this.guardandoLista.set(false)),
+      )
+      .subscribe({
+        next: (lista) => {
+          this.nombreNuevaLista = "";
+          this.cerrarModal();
+          this.modalesService.mostrarAviso(
+            `Lista «${lista.nombre}» creada y activada.`,
+          );
+        },
+        error: (error: unknown) =>
+          this.error.set(mensajeError(error, "No se pudo crear la lista.")),
+      });
   }
 
   private limpiarFormularioProducto(): void {

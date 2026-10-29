@@ -41,6 +41,36 @@
         </div>
       </ng-template>
 
+      <div class="active-list-toolbar">
+        <div class="active-list-selector">
+          <label for="listaActivaProductos">Lista activa</label>
+          <p-select
+            class="w-full"
+            inputId="listaActivaProductos"
+            name="listaActivaProductos"
+            [options]="opcionesLista()"
+            [ngModel]="listaSeleccionadaId()"
+            (ngModelChange)="cambiarLista($event)"
+            optionLabel="nombre"
+            optionValue="valor"
+            placeholder="Selecciona una lista"
+            [disabled]="cargando()"
+          />
+          @if (listaSeleccionada()) {
+          <span class="active-list-caption">
+            Añadiendo productos a «{{ listaSeleccionada()?.nombre }}»
+          </span>
+          }
+        </div>
+        <!-- <p-button
+          label="Crear lista"
+          icon="pi pi-plus"
+          [outlined]="true"
+          type="button"
+          (onClick)="abrirCrearLista()"
+        /> -->
+      </div>
+
       <div
         class="product-catalog-filters flex flex-column md:flex-row md:flex-wrap gap-2 mb-3"
       >

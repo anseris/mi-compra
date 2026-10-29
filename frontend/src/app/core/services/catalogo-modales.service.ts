@@ -5,6 +5,7 @@ export type ModalCatalogo =
   | { tipo: "producto"; producto: Producto | null }
   | { tipo: "categoria" }
   | { tipo: "secciones" }
+  | { tipo: "lista" }
   | null;
 
 @Injectable({
@@ -29,6 +30,11 @@ export class CatalogoModalesService {
   abrirSecciones(): void {
     this.limpiarAviso();
     this.modalSignal.set({ tipo: "secciones" });
+  }
+
+  abrirLista(): void {
+    this.limpiarAviso();
+    this.modalSignal.set({ tipo: "lista" });
   }
 
   cerrar(): void {

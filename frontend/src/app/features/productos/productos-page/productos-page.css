@@ -202,6 +202,38 @@
   font-size: 24px;
 }
 
+.active-list-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid #dfe7e2;
+  border-radius: 12px;
+  background: #f8fbf9;
+}
+
+.active-list-selector {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  max-width: 25rem;
+}
+
+.active-list-selector label {
+  color: #405148;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.active-list-caption {
+  color: var(--muted);
+  font-size: 11px;
+}
+
 .filters {
   display: flex;
   gap: 10px;
@@ -420,6 +452,15 @@
 
   .filters {
     flex-wrap: wrap;
+  }
+
+  .active-list-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .active-list-selector {
+    max-width: none;
   }
 
   .filters select {

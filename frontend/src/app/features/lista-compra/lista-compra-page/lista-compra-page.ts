@@ -56,7 +56,6 @@ export class ListaCompraPage implements OnInit {
   readonly filtroCategoria = signal("todas");
   readonly filtroSeccion = signal("todas");
   readonly filtroSubseccion = signal("todas");
-  nombreNuevaLista = "";
 
   readonly opcionesLista = computed(() =>
     this.listas().map((lista) => ({ nombre: lista.nombre, valor: lista._id })),
@@ -223,39 +222,6 @@ export class ListaCompraPage implements OnInit {
   cambiarFiltroSeccion(id: string): void {
     this.filtroSeccion.set(id);
     this.filtroSubseccion.set("todas");
-  }
-
-  crearLista(): void {
-    this.error.set("");
-    const nombre = this.nombreNuevaLista.trim();
-
-    if (!nombre) {
-      this.error.set("Escribe un nombre para la lista.");
-      return;
-    }
-
-    if (
-      this.listas().some(
-        (lista) => lista.nombre.toLocaleLowerCase("es") === nombre.toLocaleLowerCase("es"),
-      )
-    ) {
-      this.error.set("Ya existe una lista con ese nombre.");
-      return;
-    }
-
-    this.listaService.crearLista(nombre).subscribe({
-      next: (lista) => {
-        this.nombreNuevaLista = "";
-        this.busqueda.set("");
-        this.filtroCategoria.set("todas");
-        this.filtroSeccion.set("todas");
-        this.filtroSubseccion.set("todas");
-        this.aviso.set(`Lista «${lista.nombre}» creada.`);
-      },
-      error: (error: unknown) => {
-        this.error.set(mensajeError(error, "No se pudo crear la lista."));
-      },
-    });
   }
 
   alternar(item: ItemLista): void {

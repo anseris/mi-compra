@@ -40,23 +40,6 @@
             [disabled]="cargando()"
           />
         </div>
-        <form (ngSubmit)="crearLista()" class="flex gap-2 align-items-center">
-          <input
-            pInputText
-            name="nombreNuevaLista"
-            [(ngModel)]="nombreNuevaLista"
-            placeholder="Nombre de la nueva lista"
-            aria-label="Nombre de la nueva lista"
-            maxlength="60"
-            required
-          />
-          <p-button
-            label="Crear lista"
-            icon="pi pi-plus"
-            type="submit"
-            [disabled]="cargando()"
-          />
-        </form>
         @if (listaSeleccionada() && !listaSeleccionada()?.predeterminada) {
           <p-button
             label="Eliminar lista"

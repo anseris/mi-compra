@@ -46,6 +46,9 @@ export class ProductosPage implements OnInit {
   readonly productos = this.productosService.productos;
   readonly categorias = this.categoriasService.categorias;
   readonly secciones = this.seccionesService.secciones;
+  readonly listas = this.listaService.listas;
+  readonly listaSeleccionada = this.listaService.listaSeleccionada;
+  readonly listaSeleccionadaId = this.listaService.listaSeleccionadaId;
   readonly vista = signal<"cards" | "listado">("cards");
   readonly productosEnLista = computed(
     () =>
@@ -61,7 +64,8 @@ export class ProductosPage implements OnInit {
     () =>
       this.productosService.cargando() ||
       this.categoriasService.cargando() ||
-      this.seccionesService.cargando(),
+      this.seccionesService.cargando() ||
+      this.listaService.cargando(),
   );
 
   readonly error = signal("");
@@ -78,6 +82,13 @@ export class ProductosPage implements OnInit {
       valor: categoria._id,
     })),
   ]);
+
+  readonly opcionesLista = computed(() =>
+    this.listas().map((lista) => ({
+      nombre: lista.nombre,
+      valor: lista._id,
+    })),
+  );
 
   readonly opcionesFiltroSeccion = computed(() => [
     { nombre: "Todas las secciones", valor: "todas" },
@@ -215,7 +226,7 @@ export class ProductosPage implements OnInit {
 
   nombreSeccion(producto: Producto): string {
     return producto.seccion
-      ? this.seccionesPorId().get(producto.seccion)?.nombre ?? "Sin sección"
+      ? (this.seccionesPorId().get(producto.seccion)?.nombre ?? "Sin sección")
       : "Sin sección";
   }
 
@@ -229,6 +240,16 @@ export class ProductosPage implements OnInit {
 
   editarProducto(producto: Producto): void {
     this.modalesService.abrirProducto(producto);
+  }
+
+  cambiarLista(id: string): void {
+    this.error.set("");
+    this.listaService.seleccionarLista(id).subscribe({
+      error: (error: unknown) =>
+        this.error.set(
+          mensajeError(error, "No se pudo cargar la lista seleccionada."),
+        ),
+    });
   }
 
   eliminarProducto(producto: Producto): void {
@@ -269,8 +290,7 @@ export class ProductosPage implements OnInit {
       .pipe(
         switchMap((items) => {
           const nombreYaExiste = items.some(
-            (item) =>
-              claveNombreProducto(item.nombre) === claveNombre,
+            (item) => claveNombreProducto(item.nombre) === claveNombre,
           );
           if (nombreYaExiste) {
             this.mostrarAviso(
@@ -317,7 +337,8 @@ export class ProductosPage implements OnInit {
     }
 
     this.listaService.eliminar(item._id).subscribe({
-      next: () => this.mostrarAviso(`«${producto.nombre}» quitado de la lista.`),
+      next: () =>
+        this.mostrarAviso(`«${producto.nombre}» quitado de la lista.`),
       error: (error: unknown) =>
         this.error.set(
           mensajeError(error, "No se pudo quitar el producto de la lista."),

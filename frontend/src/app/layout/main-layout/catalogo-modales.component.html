@@ -205,3 +205,38 @@
     </form>
   </div>
 </p-dialog>
+
+<p-dialog
+  header="Crear lista"
+  [visible]="modal()?.tipo === 'lista'"
+  (visibleChange)="!$event && cerrarModal()"
+  [modal]="true"
+  [style]="{ width: 'min(28rem, 94vw)' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  @if (error()) {
+    <p-message severity="error" styleClass="w-full mb-3">
+      <span>{{ error() }}</span>
+    </p-message>
+  }
+  <form (ngSubmit)="crearLista()" class="flex flex-column gap-3">
+    <label for="modalNuevaLista">Nombre de la lista</label>
+    <input
+      id="modalNuevaLista"
+      pInputText
+      name="modalNuevaLista"
+      [(ngModel)]="nombreNuevaLista"
+      placeholder="Ej. Compra semanal"
+      aria-label="Nombre de la nueva lista"
+      maxlength="60"
+      required
+    />
+    <p-button
+      label="Crear lista"
+      icon="pi pi-plus"
+      type="submit"
+      [disabled]="guardandoLista()"
+    />
+  </form>
+</p-dialog>
