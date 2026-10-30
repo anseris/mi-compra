@@ -14,6 +14,17 @@ import { NotificacionesService } from "../../shared/services/notificaciones.serv
 import { mensajeError } from "../../shared/utils/api-error";
 import { forkJoin } from "rxjs";
 
+function normalizarNivelRuta(value: unknown): number | null {
+  const nivel =
+    typeof value === "number"
+      ? value
+      : typeof value === "string" && value.trim()
+        ? Number(value)
+        : NaN;
+
+  return Number.isInteger(nivel) && nivel >= 1 && nivel <= 17 ? nivel : null;
+}
+
 @Component({
   selector: "app-de-ruta",
   imports: [
@@ -48,18 +59,13 @@ export class DeRuta implements OnInit {
     return [
       ...new Set(
         this.items()
-          .map((item) =>
-            item.productoId
+          .map((item) => {
+            const r = item.productoId
               ? productosPorId.get(item.productoId)?.r
-              : undefined,
-          )
-          .filter(
-            (r): r is number =>
-              typeof r === "number" &&
-              Number.isInteger(r) &&
-              r >= 1 &&
-              r <= 19,
-          ),
+              : undefined;
+            return normalizarNivelRuta(r);
+          })
+          .filter((r): r is number => r !== null),
       ),
     ].sort((a, b) => a - b);
   });
@@ -71,7 +77,10 @@ export class DeRuta implements OnInit {
         return false;
       }
 
-      return productosPorId.get(item.productoId)?.r === this.nivelRuta();
+      return (
+        normalizarNivelRuta(productosPorId.get(item.productoId)?.r) ===
+        this.nivelRuta()
+      );
     });
   });
 
@@ -82,16 +91,16 @@ export class DeRuta implements OnInit {
     () => this.itemsRuta().filter((item) => item.comprado).length,
   );
 
-  readonly esUltimaParada = computed(() => this.nivelRuta() === 19);
+  readonly esUltimaParada = computed(() => this.nivelRuta() === 17);
 
   ngOnInit(): void {
     forkJoin({
-      items: this.listaService.cargar(),
-      productos: this.productosService.cargar(),
+      items: this.listaService.cargar(true),
+      productos: this.productosService.cargar(true),
     }).subscribe({
       next: () => {
         const primeraParada = this.nivelesDisponibles()[0];
-        this.nivelRuta.set(primeraParada ?? 19);
+        this.nivelRuta.set(primeraParada ?? 17);
         this.cargando.set(false);
       },
       error: (error: unknown) => {
@@ -149,7 +158,7 @@ export class DeRuta implements OnInit {
     const siguienteNivel = this.nivelesDisponibles().find(
       (nivel) => nivel > this.nivelRuta(),
     );
-    this.nivelRuta.set(siguienteNivel ?? 19);
+    this.nivelRuta.set(siguienteNivel ?? 17);
   }
 
   private terminar(): void {

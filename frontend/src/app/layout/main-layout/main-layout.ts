@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit } from "@angular/core";
+import { Component, computed, inject, OnInit, signal } from "@angular/core";
 import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
 import { ConfirmDialogModule } from "primeng/confirmdialog";
 import { ToastModule } from "primeng/toast";
@@ -36,6 +36,7 @@ export class MainLayout implements OnInit {
     () => this.listaService.items().filter((item) => !item.comprado).length,
   );
   readonly modal = this.modalesService.modal;
+  readonly menuMovilAbierto = signal(false);
 
   ngOnInit(): void {
     this.productosService.cargar().subscribe({

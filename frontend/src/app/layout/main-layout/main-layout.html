@@ -7,29 +7,44 @@
         <small>Tu compra, bajo control</small>
       </span>
     </a>
+    <button
+      class="menu-toggle"
+      type="button"
+      [attr.aria-expanded]="menuMovilAbierto()"
+      aria-controls="app-view-tabs"
+      [attr.aria-label]="menuMovilAbierto() ? 'Cerrar menú' : 'Abrir menú'"
+      (click)="menuMovilAbierto.update(abierto => !abierto)"
+    >
+      <i [class]="menuMovilAbierto() ? 'pi pi-times' : 'pi pi-bars'" aria-hidden="true"></i>
+    </button>
   </header>
 
   <main>
-    <nav class="view-tabs" aria-label="Vistas de la aplicación">
-      <a routerLink="/productos" routerLinkActive="active">
+    <nav
+      id="app-view-tabs"
+      class="view-tabs"
+      [class.menu-abierto]="menuMovilAbierto()"
+      aria-label="Vistas de la aplicación"
+    >
+      <a routerLink="/productos" routerLinkActive="active" (click)="menuMovilAbierto.set(false)">
         <i class="tab-icon pi pi-box" aria-hidden="true"></i> Mis productos
         <span class="tab-count">{{ totalProductos() }}</span>
       </a>
-      <a routerLink="/lista" routerLinkActive="active">
+      <a routerLink="/lista" routerLinkActive="active" (click)="menuMovilAbierto.set(false)">
         <i class="tab-icon pi pi-shopping-cart" aria-hidden="true"></i> Lista de la compra
         <span class="tab-count">{{ totalLista() }}</span>
         @if (pendientes() > 0) {
         <span class="tab-badge">{{ pendientes() }}</span>
         }
       </a>
-      <a routerLink="/de-ruta" routerLinkActive="active">
+      <a routerLink="/de-ruta" routerLinkActive="active" (click)="menuMovilAbierto.set(false)">
         <i class="tab-icon pi pi-directions" aria-hidden="true"></i> De ruta
         <span class="tab-count">{{ totalLista() }}</span>
         @if (pendientes() > 0) {
         <span class="tab-badge">{{ pendientes() }}</span>
         }
       </a>
-      <a routerLink="/resumen-compra" routerLinkActive="active">
+      <a routerLink="/resumen-compra" routerLinkActive="active" (click)="menuMovilAbierto.set(false)">
         <i class="tab-icon pi pi-chart-pie" aria-hidden="true"></i> Resumen de la compra
         <span class="tab-count">
           <!-- aqui va el precio total de la compra -->

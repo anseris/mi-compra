@@ -18,6 +18,16 @@
   border-bottom: 1px solid var(--line);
 }
 
+.menu-toggle {
+  display: none;
+  border: 0;
+  background: transparent;
+  color: var(--green);
+  font-size: 24px;
+  padding: 8px;
+  cursor: pointer;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -244,6 +254,12 @@ main {
     padding: 0 18px;
   }
 
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   main {
     padding: 0 16px;
   }
@@ -288,10 +304,31 @@ main {
     bottom: 10px;
   }
 
+  .view-tabs {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    margin: 0 -16px 20px;
+    padding: 6px 16px;
+    background: #fff;
+    border-bottom: 1px solid #dfe7e2;
+  }
+
+  .view-tabs.menu-abierto {
+    display: flex;
+  }
+
   .view-tabs a {
-    padding: 14px 9px;
-    font-size: 11px;
-    gap: 6px;
+    padding: 13px 10px;
+    font-size: 13px;
+    gap: 10px;
+    border-bottom: 0;
+    border-radius: 8px;
+    margin: 0;
+  }
+
+  .view-tabs a.active {
+    background: #eef7f1;
   }
 
   .app-footer {
@@ -303,11 +340,6 @@ main {
 @media (max-width: 390px) {
   .hero-art {
     display: none;
-  }
-
-  .view-tabs a {
-    font-size: 10px;
-    padding-inline: 7px;
   }
 
   .tab-count {

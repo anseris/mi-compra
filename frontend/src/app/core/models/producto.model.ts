@@ -9,7 +9,7 @@ export interface Producto {
   seccion?: string | null;
   /** Subsección dentro de la sección, si corresponde. */
   subseccion?: string;
-  /** Orden de parada en la ruta del supermercado, entre 1 y 19. */
+  /** Orden de parada en la ruta del supermercado, entre 1 y 17. */
   r?: number | null;
   favorito: boolean;
   createdAt?: string;

@@ -148,8 +148,8 @@ export class CatalogoModalesComponent implements OnInit {
       return;
     }
     const r = this.rProducto.trim() ? Number(this.rProducto) : null;
-    if (r !== null && (!Number.isInteger(r) || r < 1 || r > 19)) {
-      this.notificaciones.error("La ruta debe ser un número entero entre 1 y 19.");
+    if (r !== null && (!Number.isInteger(r) || r < 1 || r > 17)) {
+      this.notificaciones.error("La ruta debe ser un número entero entre 1 y 17.");
       return;
     }
     if (!this.categoriaSeleccionada) {

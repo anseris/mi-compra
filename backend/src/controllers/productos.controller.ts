@@ -25,7 +25,7 @@ function rutaValida(value: unknown): number | null | undefined {
   }
 
   const ruta = Number(value);
-  return Number.isInteger(ruta) && ruta >= 1 && ruta <= 19 ? ruta : undefined;
+  return Number.isInteger(ruta) && ruta >= 1 && ruta <= 17 ? ruta : undefined;
 }
 
 /** Comprueba que la categoría existe. */
@@ -108,7 +108,7 @@ export const createProducto = async (req: Request, res: Response): Promise<void>
     }
 
     if (r === undefined) {
-      res.status(400).json({ mensaje: 'La ruta debe ser un número entero entre 1 y 19.' });
+      res.status(400).json({ mensaje: 'La ruta debe ser un número entero entre 1 y 17.' });
       return;
     }
 
@@ -180,7 +180,7 @@ export const updateProducto = async (req: Request, res: Response): Promise<void>
       const r = rutaValida(req.body.r);
 
       if (r === undefined) {
-        res.status(400).json({ mensaje: 'La ruta debe ser un número entero entre 1 y 19.' });
+        res.status(400).json({ mensaje: 'La ruta debe ser un número entero entre 1 y 17.' });
         return;
       }
 

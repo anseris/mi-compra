@@ -48,7 +48,7 @@ const productoSchema = new Schema<IProducto>(
     r: {
       type: Number,
       min: 1,
-      max: 19,
+      max: 17,
       default: null,
     },
     favorito: {
