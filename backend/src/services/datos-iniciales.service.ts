@@ -1,4 +1,5 @@
 import { Categoria } from "../models/categoria.model.js";
+import { Producto } from "../models/producto.model.js";
 import { Seccion } from "../models/seccion.model.js";
 
 /**
@@ -61,5 +62,13 @@ export async function crearSeccionesPorDefecto(): Promise<void> {
         upsert: true,
       },
     })),
+  );
+}
+
+/** Completa el nuevo campo favorito en productos antiguos sin sobrescribir preferencias. */
+export async function completarFavoritoProductosExistentes(): Promise<void> {
+  await Producto.updateMany(
+    { favorito: { $exists: false } },
+    { $set: { favorito: false } },
   );
 }

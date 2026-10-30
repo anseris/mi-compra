@@ -16,6 +16,7 @@ import { mensajeError } from "../../../shared/utils/api-error";
 import { CardModule } from "primeng/card";
 import { InputTextModule } from "primeng/inputtext";
 import { DividerModule } from "primeng/divider";
+import { ToggleSwitchModule } from "primeng/toggleswitch";
 import { EMPTY, finalize, switchMap } from "rxjs";
 
 function claveNombreProducto(nombre: string): string {
@@ -32,6 +33,7 @@ function claveNombreProducto(nombre: string): string {
     SelectModule,
     InputTextModule,
     DividerModule,
+    ToggleSwitchModule,
   ],
   templateUrl: "./productos-page.html",
   styleUrl: "./productos-page.css",
@@ -80,6 +82,7 @@ export class ProductosPage implements OnInit {
   readonly filtroCategoria = signal("todas");
   readonly filtroSeccion = signal("todas");
   readonly filtroSubseccion = signal("todas");
+  readonly soloFavoritos = signal(false);
 
   readonly opcionesFiltroCategoria = computed(() => [
     { nombre: "Todas las categorías", valor: "todas" },
@@ -133,6 +136,7 @@ export class ProductosPage implements OnInit {
     const filtroCategoria = this.filtroCategoria();
     const filtroSeccion = this.filtroSeccion();
     const filtroSubseccion = this.filtroSubseccion();
+    const soloFavoritos = this.soloFavoritos();
     const categorias = this.categoriasPorId();
     const secciones = this.seccionesPorId();
 
@@ -160,12 +164,14 @@ export class ProductosPage implements OnInit {
       const coincideSubseccion =
         filtroSubseccion === "todas" ||
         producto.subseccion === filtroSubseccion;
+      const coincideFavorito = !soloFavoritos || producto.favorito;
 
       return (
         coincideTexto &&
         coincideCategoria &&
         coincideSeccion &&
-        coincideSubseccion
+        coincideSubseccion &&
+        coincideFavorito
       );
     });
   });
@@ -175,7 +181,8 @@ export class ProductosPage implements OnInit {
       Boolean(this.busqueda().trim()) ||
       this.filtroCategoria() !== "todas" ||
       this.filtroSeccion() !== "todas" ||
-      this.filtroSubseccion() !== "todas",
+      this.filtroSubseccion() !== "todas" ||
+      this.soloFavoritos(),
   );
 
   ngOnInit(): void {

@@ -298,6 +298,21 @@
   white-space: nowrap;
 }
 
+.product-catalog-favorite-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 6px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.favorite-star {
+  color: #e6a323;
+  flex: 0 0 auto;
+  font-size: 0.9rem;
+}
+
 :host ::ng-deep .product-added-card .p-card {
   border: 1px solid #9ed5b5;
   background: #f0faf4;
@@ -328,6 +343,10 @@
 
 .product-list-icon {
   flex: 0 0 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   text-align: center;
 }
 

@@ -4,6 +4,7 @@ import { connectDatabase } from './config/database.js';
 import {
   crearCategoriasPorDefecto,
   crearSeccionesPorDefecto,
+  completarFavoritoProductosExistentes,
 } from './services/datos-iniciales.service.js';
 import { sincronizarSeccionesDeArticulosExistentes } from './services/sincronizar-secciones-lista.service.js';
 
@@ -31,6 +32,7 @@ async function startServer(): Promise<void> {
   // La aplicación no tiene cuentas: las categorías iniciales se crean una sola vez.
   await crearCategoriasPorDefecto();
   await crearSeccionesPorDefecto();
+  await completarFavoritoProductosExistentes();
   await sincronizarSeccionesDeArticulosExistentes();
 
   app.listen(port, '0.0.0.0', () => {

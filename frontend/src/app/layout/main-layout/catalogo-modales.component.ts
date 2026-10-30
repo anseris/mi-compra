@@ -5,6 +5,7 @@ import { DialogModule } from "primeng/dialog";
 import { InputNumberModule } from "primeng/inputnumber";
 import { InputTextModule } from "primeng/inputtext";
 import { SelectModule } from "primeng/select";
+import { ToggleSwitchModule } from "primeng/toggleswitch";
 import { CategoriasService } from "../../core/services/categorias.service";
 import { CatalogoModalesService } from "../../core/services/catalogo-modales.service";
 import { ProductosService } from "../../core/services/productos.service";
@@ -28,6 +29,7 @@ function normalizarNombreProducto(nombre: string): string {
     InputNumberModule,
     InputTextModule,
     SelectModule,
+    ToggleSwitchModule,
   ],
   templateUrl: "./catalogo-modales.component.html",
 })
@@ -50,6 +52,7 @@ export class CatalogoModalesComponent implements OnInit {
 
   nombreProducto = "";
   rProducto = "";
+  favoritoProducto = false;
   precio: number | null = null;
   categoriaSeleccionada = "";
   subseccionSeleccionada = "";
@@ -84,6 +87,7 @@ export class CatalogoModalesComponent implements OnInit {
         this.editandoId = producto._id;
         this.nombreProducto = producto.nombre;
         this.rProducto = producto.r == null ? "" : String(producto.r);
+        this.favoritoProducto = producto.favorito ?? false;
         this.precio = producto.precio;
         this.categoriaSeleccionada = producto.categoria;
         this.seccionSeleccionada.set(producto.seccion ?? "");
@@ -162,6 +166,7 @@ export class CatalogoModalesComponent implements OnInit {
       precio,
       categoria: this.categoriaSeleccionada,
       r,
+      favorito: this.favoritoProducto,
     };
     const seccion = this.seccionSeleccionada();
     const datosSeccion = seccion
@@ -334,6 +339,7 @@ export class CatalogoModalesComponent implements OnInit {
   private limpiarFormularioProducto(): void {
     this.nombreProducto = "";
     this.rProducto = "";
+    this.favoritoProducto = false;
     this.precio = null;
     this.categoriaSeleccionada = untracked(
       () => this.categorias()[0]?._id ?? "",

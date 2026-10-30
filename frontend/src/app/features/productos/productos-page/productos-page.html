@@ -135,8 +135,18 @@
         <div
           class="product-catalog-view-toggle"
           role="group"
-          aria-label="Vista del catálogo"
+          aria-label="Filtrado y vista del catálogo"
         >
+          <div class="product-catalog-favorite-filter">
+            <label for="filtroSoloFavoritos">Solo favoritos</label>
+            <p-toggleswitch
+              inputId="filtroSoloFavoritos"
+              name="filtroSoloFavoritos"
+              [ngModel]="soloFavoritos()"
+              (ngModelChange)="soloFavoritos.set($event)"
+              ariaLabel="Mostrar solo productos favoritos"
+            />
+          </div>
           <p-button
             label=""
             icon="pi pi-th-large"
@@ -171,7 +181,12 @@
           <p-card styleClass="h-full">
             <ng-template pTemplate="header">
               <div class="flex align-items-center justify-content-between p-2">
-                <span class="text-2xl">{{ iconoCategoria(producto) }}</span>
+                <div class="flex align-items-center gap-2">
+                  <span class="text-2xl">{{ iconoCategoria(producto) }}</span>
+                  @if (producto.favorito) {
+                  <i class="pi pi-star-fill favorite-star" role="img" aria-label="Favorito"></i>
+                  }
+                </div>
                 <div class="flex align-items-center gap-1">
                   @if (productoEnLista(producto)) {
                   <span class="product-added-label">En la lista</span>
@@ -227,9 +242,12 @@
           class="product-list-item flex align-items-center gap-3 p-3 border-1 border-round"
           [class.product-list-item-added]="productoEnLista(producto)"
         >
-          <span class="text-2xl product-list-icon"
-            >{{ iconoCategoria(producto) }}</span
-          >
+          <div class="text-2xl product-list-icon">
+            <span>{{ iconoCategoria(producto) }}</span>
+            @if (producto.favorito) {
+            <i class="pi pi-star-fill favorite-star" role="img" aria-label="Favorito"></i>
+            }
+          </div>
           <div class="flex-1 min-w-0">
             <div class="flex align-items-center flex-wrap gap-2">
               <span class="font-semibold">{{ producto.nombre }}</span>

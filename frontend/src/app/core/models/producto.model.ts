@@ -11,6 +11,7 @@ export interface Producto {
   subseccion?: string;
   /** Orden de parada en la ruta del supermercado, entre 1 y 19. */
   r?: number | null;
+  favorito: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -23,6 +24,7 @@ export interface CrearProducto {
   seccion: string;
   subseccion?: string;
   r?: number | null;
+  favorito?: boolean;
 }
 
 /** Cuerpo para modificar un producto (PUT): todos los campos son opcionales. */

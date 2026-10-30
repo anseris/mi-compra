@@ -90,6 +90,7 @@ export const createProducto = async (req: Request, res: Response): Promise<void>
     const nombre = nombreValido(req.body?.nombre);
     const precio = precioValido(req.body?.precio);
     const r = rutaValida(req.body?.r ?? null);
+    const favorito = req.body?.favorito === undefined ? false : req.body.favorito;
     const categoria = await categoriaValida(req.body?.categoria);
     const seccion = await seccionValida(req.body?.seccion);
     const subseccion = seccion
@@ -108,6 +109,11 @@ export const createProducto = async (req: Request, res: Response): Promise<void>
 
     if (r === undefined) {
       res.status(400).json({ mensaje: 'La ruta debe ser un número entero entre 1 y 19.' });
+      return;
+    }
+
+    if (typeof favorito !== 'boolean') {
+      res.status(400).json({ mensaje: 'El valor de favorito debe ser booleano.' });
       return;
     }
 
@@ -133,6 +139,7 @@ export const createProducto = async (req: Request, res: Response): Promise<void>
       seccion: seccion._id,
       subseccion,
       r: r ?? null,
+      favorito,
     });
 
     res.status(201).json(producto);
@@ -178,6 +185,15 @@ export const updateProducto = async (req: Request, res: Response): Promise<void>
       }
 
       cambios['r'] = r;
+    }
+
+    if (req.body?.favorito !== undefined) {
+      if (typeof req.body.favorito !== 'boolean') {
+        res.status(400).json({ mensaje: 'El valor de favorito debe ser booleano.' });
+        return;
+      }
+
+      cambios['favorito'] = req.body.favorito;
     }
 
     if (req.body?.categoria !== undefined) {

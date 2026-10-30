@@ -60,19 +60,30 @@
       </div>
     </div>
 
-    <div class="flex flex-column gap-2">
-      <label for="modalProductoRuta">Ruta (1-19)</label>
-      <input
-        id="modalProductoRuta"
-        pInputText
-        name="modalProductoRuta"
-        type="text"
-        inputmode="numeric"
-        [(ngModel)]="rProducto"
-        placeholder="Ej. 1"
-        maxlength="2"
-        class="w-full"
-      />
+    <div class="grid align-items-end">
+      <div class="col-12 md:col-6 flex flex-column gap-2">
+        <label for="modalProductoRuta">Ruta (1-19)</label>
+        <input
+          id="modalProductoRuta"
+          pInputText
+          name="modalProductoRuta"
+          type="text"
+          inputmode="numeric"
+          [(ngModel)]="rProducto"
+          placeholder="Ej. 1"
+          maxlength="2"
+          class="w-full"
+        />
+      </div>
+      <div class="col-12 md:col-6 flex flex-column gap-2">
+        <label for="modalProductoFavorito">Favorito</label>
+        <p-toggleswitch
+          inputId="modalProductoFavorito"
+          name="modalProductoFavorito"
+          [(ngModel)]="favoritoProducto"
+          ariaLabel="Marcar producto como favorito"
+        />
+      </div>
     </div>
 
     <!-- Tercera línea: Categoría y precio -->

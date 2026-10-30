@@ -12,6 +12,7 @@ export interface IProducto {
   subseccion: string;
   /** Orden de parada en la ruta del supermercado. */
   r: number | null;
+  favorito: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -49,6 +50,10 @@ const productoSchema = new Schema<IProducto>(
       min: 1,
       max: 19,
       default: null,
+    },
+    favorito: {
+      type: Boolean,
+      default: false,
     },
   },
   {
