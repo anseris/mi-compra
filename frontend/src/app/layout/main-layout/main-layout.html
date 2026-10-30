@@ -10,22 +10,6 @@
   </header>
 
   <main>
-    <!-- <section class="hero">
-      <div>
-        <div class="eyebrow">
-          <span class="eyebrow-line"></span> COMPRA INTELIGENTE
-        </div>
-        <h1>Organiza tu compra.<br /><span>Controla tu presupuesto.</span></h1>
-        <p>Guarda tus productos habituales y prepara tu lista en segundos.</p>
-      </div>
-      <div class="hero-art" aria-hidden="true">
-        <span class="art-circle"></span>
-        <span class="art-leaf leaf-one">✦</span>
-        <span class="art-bag">🛒</span>
-        <span class="art-leaf leaf-two">✦</span>
-      </div>
-    </section> -->
-
     <nav class="view-tabs" aria-label="Vistas de la aplicación">
       <a routerLink="/productos" routerLinkActive="active">
         <span class="tab-icon">▦</span> Mis productos
@@ -37,6 +21,19 @@
         @if (pendientes() > 0) {
         <span class="tab-badge">{{ pendientes() }}</span>
         }
+      </a>
+      <a routerLink="/de-ruta" routerLinkActive="active">
+        <span class="tab-icon">☷</span> De ruta
+        <span class="tab-count">{{ totalLista() }}</span>
+        @if (pendientes() > 0) {
+        <span class="tab-badge">{{ pendientes() }}</span>
+        }
+      </a>
+      <a routerLink="/resumen-compra" routerLinkActive="active">
+        <span class="tab-icon">▦</span> Resumen de la compra
+        <span class="tab-count">
+          <!-- aqui va el precio total de la compra -->
+        </span>
       </a>
     </nav>
 
