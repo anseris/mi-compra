@@ -15,6 +15,19 @@ function precioValido(value: unknown): number | null {
   return Number.isFinite(precio) && precio >= 0 ? precio : null;
 }
 
+function rutaValida(value: unknown): number | null | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (value === null || value === '') {
+    return null;
+  }
+
+  const ruta = Number(value);
+  return Number.isInteger(ruta) && ruta >= 1 && ruta <= 19 ? ruta : undefined;
+}
+
 /** Comprueba que la categoría existe. */
 async function categoriaValida(
   categoriaId: unknown,
@@ -76,6 +89,7 @@ export const createProducto = async (req: Request, res: Response): Promise<void>
   try {
     const nombre = nombreValido(req.body?.nombre);
     const precio = precioValido(req.body?.precio);
+    const r = rutaValida(req.body?.r ?? null);
     const categoria = await categoriaValida(req.body?.categoria);
     const seccion = await seccionValida(req.body?.seccion);
     const subseccion = seccion
@@ -89,6 +103,11 @@ export const createProducto = async (req: Request, res: Response): Promise<void>
 
     if (precio === null) {
       res.status(400).json({ mensaje: 'El precio debe ser un número positivo.' });
+      return;
+    }
+
+    if (r === undefined) {
+      res.status(400).json({ mensaje: 'La ruta debe ser un número entero entre 1 y 19.' });
       return;
     }
 
@@ -113,6 +132,7 @@ export const createProducto = async (req: Request, res: Response): Promise<void>
       categoria: categoria._id,
       seccion: seccion._id,
       subseccion,
+      r: r ?? null,
     });
 
     res.status(201).json(producto);
@@ -147,6 +167,17 @@ export const updateProducto = async (req: Request, res: Response): Promise<void>
       }
 
       cambios['precio'] = precio;
+    }
+
+    if (req.body?.r !== undefined) {
+      const r = rutaValida(req.body.r);
+
+      if (r === undefined) {
+        res.status(400).json({ mensaje: 'La ruta debe ser un número entero entre 1 y 19.' });
+        return;
+      }
+
+      cambios['r'] = r;
     }
 
     if (req.body?.categoria !== undefined) {

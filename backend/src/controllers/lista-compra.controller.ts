@@ -177,6 +177,28 @@ export const clearComprados = async (req: Request, res: Response): Promise<void>
   }
 };
 
+// DELETE /api/lista/todos — quitar todos los artículos de la lista
+export const clearItems = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const lista = await obtenerListaCompra(String(req.query['listaId'] ?? '').trim());
+
+    if (!lista) {
+      res.status(404).json({ mensaje: 'Lista no encontrada.' });
+      return;
+    }
+
+    const resultado = await ItemLista.deleteMany({ listaId: lista._id });
+
+    res.status(200).json({
+      mensaje: 'Artículos eliminados de la lista.',
+      eliminados: resultado.deletedCount,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ mensaje: 'No se pudieron eliminar los artículos de la lista.' });
+  }
+};
+
 // DELETE /api/lista/:id — quitar un artículo de la lista
 export const deleteItem = async (req: Request, res: Response): Promise<void> => {
   try {

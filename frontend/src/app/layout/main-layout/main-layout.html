@@ -12,25 +12,25 @@
   <main>
     <nav class="view-tabs" aria-label="Vistas de la aplicación">
       <a routerLink="/productos" routerLinkActive="active">
-        <span class="tab-icon">▦</span> Mis productos
+        <i class="tab-icon pi pi-box" aria-hidden="true"></i> Mis productos
         <span class="tab-count">{{ totalProductos() }}</span>
       </a>
       <a routerLink="/lista" routerLinkActive="active">
-        <span class="tab-icon">☷</span> Lista de la compra
+        <i class="tab-icon pi pi-shopping-cart" aria-hidden="true"></i> Lista de la compra
         <span class="tab-count">{{ totalLista() }}</span>
         @if (pendientes() > 0) {
         <span class="tab-badge">{{ pendientes() }}</span>
         }
       </a>
       <a routerLink="/de-ruta" routerLinkActive="active">
-        <span class="tab-icon">☷</span> De ruta
+        <i class="tab-icon pi pi-directions" aria-hidden="true"></i> De ruta
         <span class="tab-count">{{ totalLista() }}</span>
         @if (pendientes() > 0) {
         <span class="tab-badge">{{ pendientes() }}</span>
         }
       </a>
       <a routerLink="/resumen-compra" routerLinkActive="active">
-        <span class="tab-icon">▦</span> Resumen de la compra
+        <i class="tab-icon pi pi-chart-pie" aria-hidden="true"></i> Resumen de la compra
         <span class="tab-count">
           <!-- aqui va el precio total de la compra -->
         </span>

@@ -127,22 +127,8 @@ export class ListaCompraPage implements OnInit {
       this.filtroSubseccion() !== "todas",
   );
 
-  readonly total = computed(() =>
-    this.items().reduce((suma, item) => suma + item.precio * item.cantidad, 0),
-  );
-
-  readonly totalComprado = computed(() =>
-    this.items()
-      .filter((item) => item.comprado)
-      .reduce((suma, item) => suma + item.precio * item.cantidad, 0),
-  );
-
   readonly pendientes = computed(
     () => this.items().filter((item) => !item.comprado).length,
-  );
-
-  readonly totalUnidades = computed(() =>
-    this.items().reduce((suma, item) => suma + item.cantidad, 0),
   );
 
   readonly hayComprados = computed(() =>

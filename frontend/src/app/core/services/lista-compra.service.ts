@@ -172,6 +172,14 @@ export class ListaCompraService {
     );
   }
 
+  vaciarLista(): Observable<ApiMensaje> {
+    return this.http
+      .delete<ApiMensaje>(
+        `${this.apiUrl}/todos?listaId=${encodeURIComponent(this.listaSeleccionadaIdSignal())}`,
+      )
+      .pipe(tap(() => this.itemsSignal.set([])));
+  }
+
   private cargarItemsSeleccionados(): Observable<ItemLista[]> {
     const listaId = this.listaSeleccionadaIdSignal();
 

@@ -10,6 +10,8 @@ export interface IProducto {
   seccion: Types.ObjectId | null;
   /** Subsección dentro de la sección, si corresponde. */
   subseccion: string;
+  /** Orden de parada en la ruta del supermercado. */
+  r: number | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -41,6 +43,12 @@ const productoSchema = new Schema<IProducto>(
       type: String,
       trim: true,
       default: '',
+    },
+    r: {
+      type: Number,
+      min: 1,
+      max: 19,
+      default: null,
     },
   },
   {

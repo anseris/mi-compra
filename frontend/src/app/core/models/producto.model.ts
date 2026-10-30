@@ -9,6 +9,8 @@ export interface Producto {
   seccion?: string | null;
   /** Subsección dentro de la sección, si corresponde. */
   subseccion?: string;
+  /** Orden de parada en la ruta del supermercado, entre 1 y 19. */
+  r?: number | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -20,6 +22,7 @@ export interface CrearProducto {
   categoria: string;
   seccion: string;
   subseccion?: string;
+  r?: number | null;
 }
 
 /** Cuerpo para modificar un producto (PUT): todos los campos son opcionales. */

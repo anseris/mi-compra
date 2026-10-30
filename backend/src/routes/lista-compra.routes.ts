@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   addItem,
   clearComprados,
+  clearItems,
   deleteItem,
   getItems,
   updateItem,
@@ -13,6 +14,7 @@ router.get('/', getItems);
 router.post('/', addItem);
 // Las rutas fijas deben ir antes que las que usan un id.
 router.delete('/comprados', clearComprados);
+router.delete('/todos', clearItems);
 router.patch('/:id', updateItem);
 router.delete('/:id', deleteItem);
 

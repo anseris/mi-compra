@@ -49,6 +49,7 @@ export class CatalogoModalesComponent implements OnInit {
   readonly seccionParaSubseccion = signal("");
 
   nombreProducto = "";
+  rProducto = "";
   precio: number | null = null;
   categoriaSeleccionada = "";
   subseccionSeleccionada = "";
@@ -82,6 +83,7 @@ export class CatalogoModalesComponent implements OnInit {
       if (producto) {
         this.editandoId = producto._id;
         this.nombreProducto = producto.nombre;
+        this.rProducto = producto.r == null ? "" : String(producto.r);
         this.precio = producto.precio;
         this.categoriaSeleccionada = producto.categoria;
         this.seccionSeleccionada.set(producto.seccion ?? "");
@@ -141,6 +143,11 @@ export class CatalogoModalesComponent implements OnInit {
       this.notificaciones.error("Indica un precio válido (0 o más).");
       return;
     }
+    const r = this.rProducto.trim() ? Number(this.rProducto) : null;
+    if (r !== null && (!Number.isInteger(r) || r < 1 || r > 19)) {
+      this.notificaciones.error("La ruta debe ser un número entero entre 1 y 19.");
+      return;
+    }
     if (!this.categoriaSeleccionada) {
       this.notificaciones.error("Crea o selecciona una categoría.");
       return;
@@ -150,7 +157,12 @@ export class CatalogoModalesComponent implements OnInit {
       return;
     }
 
-    const datosBase = { nombre, precio, categoria: this.categoriaSeleccionada };
+    const datosBase = {
+      nombre,
+      precio,
+      categoria: this.categoriaSeleccionada,
+      r,
+    };
     const seccion = this.seccionSeleccionada();
     const datosSeccion = seccion
       ? { seccion, subseccion: this.subseccionSeleccionada }
@@ -321,6 +333,7 @@ export class CatalogoModalesComponent implements OnInit {
 
   private limpiarFormularioProducto(): void {
     this.nombreProducto = "";
+    this.rProducto = "";
     this.precio = null;
     this.categoriaSeleccionada = untracked(
       () => this.categorias()[0]?._id ?? "",

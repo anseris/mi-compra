@@ -1,4 +1,6 @@
+import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ListaCompraService } from "../../core/services/lista-compra.service";
 
 import { ResumenCompra } from './resumen-compra';
 
@@ -8,7 +10,13 @@ describe('ResumenCompra', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ResumenCompra]
+      imports: [ResumenCompra],
+      providers: [
+        {
+          provide: ListaCompraService,
+          useValue: { items: signal([]) },
+        },
+      ],
     })
     .compileComponents();
 

@@ -1,5 +1,5 @@
 <div class="grid">
-  <div class="col-12 lg:col-8">
+  <div class="col-12">
     <p-card>
       <ng-template pTemplate="header">
         <div class="flex align-items-center justify-content-between p-3">
@@ -141,47 +141,4 @@
     </p-card>
   </div>
 
-  <div class="col-12 lg:col-4">
-    <p-card>
-      <ng-template pTemplate="header">
-        <div class="flex align-items-center gap-2 p-3">
-          <i class="pi pi-euro text-primary text-xl"></i>
-          <div class="text-sm font-semibold">RESUMEN DE COMPRA</div>
-        </div>
-      </ng-template>
-      <div class="flex flex-column gap-2">
-        <div class="text-xl font-bold">Tu compra estimada</div>
-        <div class="text-sm text-color-secondary">El total se actualiza al cambiar las cantidades.</div>
-
-        <div class="flex align-items-center justify-content-between mt-2">
-          <span>Productos en la lista</span>
-          <span class="font-semibold">{{ items().length }}</span>
-        </div>
-        <div class="flex align-items-center justify-content-between">
-          <span>Unidades en total</span>
-          <span class="font-semibold">{{ totalUnidades() }}</span>
-        </div>
-        <div class="flex align-items-center justify-content-between">
-          <span>Ya comprado</span>
-          <span class="font-semibold">{{ totalComprado() | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }}</span>
-        </div>
-
-        <p-divider></p-divider>
-
-        <div class="flex align-items-center justify-content-between text-lg">
-          <span class="font-semibold">Total estimado</span>
-          <span class="font-bold text-xl">{{ total() | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }}</span>
-        </div>
-
-        <div class="flex gap-2 p-3 surface-50 border-round mt-2">
-          <i class="pi pi-info-circle text-primary"></i>
-          <div class="text-sm text-color-secondary">
-            Estimación basada en los precios que has guardado. El precio real en tienda puede variar.
-          </div>
-        </div>
-
-        <p-button label="Añadir productos" icon="pi pi-plus" styleClass="w-full mt-2" routerLink="/productos" />
-      </div>
-    </p-card>
-  </div>
 </div>
