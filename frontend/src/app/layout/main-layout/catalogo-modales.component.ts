@@ -47,6 +47,7 @@ export class CatalogoModalesComponent implements OnInit {
   readonly modal = this.modalesService.modal;
   readonly guardandoProducto = signal(false);
   readonly guardandoLista = signal(false);
+  readonly planoVisible = signal(false);
   readonly seccionSeleccionada = signal("");
   readonly seccionParaSubseccion = signal("");
 
@@ -61,6 +62,26 @@ export class CatalogoModalesComponent implements OnInit {
   nombreNuevaSeccion = "";
   nombreNuevaSubseccion = "";
   nombreNuevaLista = "";
+
+  readonly paradasPlano = [
+    { numero: 12, x: 60, y: 28, ancho: 100, alto: 64 },
+    { numero: 5, x: 160, y: 28, ancho: 100, alto: 64 },
+    { numero: 4, x: 260, y: 28, ancho: 100, alto: 64 },
+    { numero: 11, x: 60, y: 92, ancho: 100, alto: 64 },
+    { numero: 6, x: 160, y: 92, ancho: 100, alto: 64 },
+    { numero: 3, x: 260, y: 92, ancho: 100, alto: 64 },
+    { numero: 16, x: 60, y: 180, ancho: 60, alto: 64 },
+    { numero: 13, x: 120, y: 180, ancho: 60, alto: 64 },
+    { numero: 10, x: 180, y: 180, ancho: 60, alto: 64 },
+    { numero: 7, x: 240, y: 180, ancho: 60, alto: 64 },
+    { numero: 2, x: 300, y: 180, ancho: 60, alto: 64 },
+    { numero: 15, x: 60, y: 244, ancho: 60, alto: 64 },
+    { numero: 14, x: 120, y: 244, ancho: 60, alto: 64 },
+    { numero: 9, x: 180, y: 244, ancho: 60, alto: 64 },
+    { numero: 8, x: 240, y: 244, ancho: 60, alto: 64 },
+    { numero: 1, x: 300, y: 244, ancho: 60, alto: 64 },
+    { numero: 17, x: 60, y: 308, ancho: 300, alto: 48 },
+  ];
 
   readonly opcionesSubseccionFormulario = computed(
     () =>
@@ -121,6 +142,18 @@ export class CatalogoModalesComponent implements OnInit {
     this.seccionSeleccionada.set(seccionId);
     if (!this.opcionesSubseccionFormulario().includes(this.subseccionSeleccionada)) {
       this.subseccionSeleccionada = "";
+    }
+  }
+
+  seleccionarRutaPlano(numero: number): void {
+    this.rProducto = String(numero);
+    this.planoVisible.set(false);
+  }
+
+  seleccionarRutaConTeclado(event: KeyboardEvent, numero: number): void {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      this.seleccionarRutaPlano(numero);
     }
   }
 
