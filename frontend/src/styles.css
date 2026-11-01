@@ -330,3 +330,17 @@ button {
   background: #f0faf4;
   color: #176b52;
 }
+
+.favorito {
+  padding: 0 0 20px 170px;
+}
+
+
+
+@media (max-width: 760px) {
+  .favorito {
+    padding: 0 0 20px 75px;
+  }
+}
+
+

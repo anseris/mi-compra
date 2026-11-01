@@ -61,7 +61,7 @@
     </div>
 
     <div class="grid align-items-end">
-      <div class="col-12 md:col-4 flex flex-column gap-2">
+      <div class="col-4 md:col-4 flex flex-column gap-2">
         <label for="modalProductoRuta">Ruta (1-17)</label>
         <input
           id="modalProductoRuta"
@@ -75,17 +75,16 @@
           class="w-full"
         />
       </div>
-      <div class="col-12 md:col-4 flex flex-column gap-2">
-        <span>Plano</span>
+      <div class="col-2 md:col-2 flex flex-column gap-2">
         <p-button
-          label="Plano"
+          label=""
           icon="pi pi-map"
           type="button"
           (onClick)="planoVisible.set(true)"
           styleClass="w-full"
         />
       </div>
-      <div class="col-12 md:col-4 flex flex-column gap-2">
+      <div class="col-3 md:col-4 flex flex-column gap-2 favorito">
         <label for="modalProductoFavorito">Favorito</label>
         <p-toggleswitch
           inputId="modalProductoFavorito"
@@ -158,47 +157,38 @@
     viewBox="0 0 380 380"
     role="group"
     aria-label="Plano interactivo del supermercado"
-    style="display: block; width: 100%; height: auto;"
+    style="display: block; width: 100%; height: auto"
   >
-    <rect
-      x="8"
-      y="8"
-      width="364"
-      height="364"
-      fill="#ffffff"
-      stroke="#263b30"
-      stroke-width="2"
-    />
     @for (parada of paradasPlano; track parada.numero) {
-    <g
-      role="button"
-      tabindex="0"
-      [attr.aria-label]="'Seleccionar parada ' + parada.numero"
-      (click)="seleccionarRutaPlano(parada.numero)"
-      (keydown)="seleccionarRutaConTeclado($event, parada.numero)"
-      style="cursor: pointer;"
-    >
-      <rect
-        [attr.x]="parada.x"
-        [attr.y]="parada.y"
-        [attr.width]="parada.ancho"
-        [attr.height]="parada.alto"
-        fill="#f8fbf8"
-        stroke="#263b30"
-        stroke-width="1"
-      />
-      <text
-        [attr.x]="parada.x + parada.ancho / 2"
-        [attr.y]="parada.y + parada.alto / 2"
-        text-anchor="middle"
-        dominant-baseline="middle"
-        fill="#1d3328"
-        font-size="14"
-        font-family="sans-serif"
+      <g
+        role="button"
+        tabindex="0"
+        [attr.aria-label]="'Seleccionar parada ' + parada.numero"
+        (click)="seleccionarRutaPlano(parada.numero)"
+        (keydown)="seleccionarRutaConTeclado($event, parada.numero)"
+        style="cursor: pointer"
       >
-        {{ parada.numero }}
-      </text>
-    </g>
+        <rect
+          [attr.x]="parada.x"
+          [attr.y]="parada.y"
+          [attr.width]="parada.ancho"
+          [attr.height]="parada.alto"
+          fill="#f8fbf8"
+          stroke="#263b30"
+          stroke-width="1"
+        />
+        <text
+          [attr.x]="parada.x + parada.ancho / 2"
+          [attr.y]="parada.y + parada.alto / 2"
+          text-anchor="middle"
+          dominant-baseline="middle"
+          fill="#1d3328"
+          font-size="14"
+          font-family="sans-serif"
+        >
+          {{ parada.numero }}
+        </text>
+      </g>
     }
   </svg>
 </p-dialog>
